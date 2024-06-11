@@ -5,32 +5,28 @@ from typing import Any, Union, Dict, Annotated
 from fastapi import HTTPException, Request, Response, status
 from fastapi.security import APIKeyCookie, APIKeyHeader
 
-from app.core.security.models.jwt_config import JwtConfig
+from app.core.security.models.jwt_config import JwtConfig, CookieNames
 from app.core.security.models.jwt_constant import SecurityPayloadReturn, SecurityTokenReturn, TokenType
 
 import jwt
 
+cookie_names = CookieNames()
+
+access_cookie_depend = APIKeyCookie(name=cookie_names.access_token_cookie, description="Access token in cookies")
+access_csrf_depend = APIKeyCookie(name=cookie_names.access_token_csrf, description="Access csrf token from cookies")
+
+refresh_cookie_depend = APIKeyCookie(name=cookie_names.refresh_token_cookie, description="Refresh token in cookies")
+refresh_csrf_depend = APIKeyCookie(name=cookie_names.refresh_token_cookie, description="Refresh token in cookies")
+
+header_csrf_depend = APIKeyHeader(name="X-CSRF-Token", description="Csrf for jwt token")
+
 class JwtSecurity:
     config: JwtConfig
-
-    access_cookie_depend: APIKeyCookie
-    access_csrf_depend: APIKeyCookie
-
-    refresh_cookie_depend: APIKeyCookie
-    refresh_csrf_depend: APIKeyCookie
-    jwt_header_depend: APIKeyHeader
     
     def __init__(self, config: JwtConfig) -> None:
         self.jwt = jwt.PyJWT()
         self.config = config
-
-        self.access_cookie_depend = APIKeyCookie(name=self.config.access_token_cookie, description="Access token in cookies")
-        self.access_csrf_depend = APIKeyCookie(name=self.config.access_token_csrf, description="Access csrf token from cookies")
     
-        self.refresh_cookie_depend = APIKeyCookie(name=self.config.refresh_token_cookie, description="Refresh token in cookies")
-        self.refresh_csrf_depend = APIKeyCookie(name=self.config.refresh_token_cookie, description="Refresh token in cookies")
-        
-        self.jwt_header_depend = APIKeyHeader(name="X-CSRF-Token", description="Csrf for jwt token")
 
     def _g_posix(self) -> float:
         """
@@ -118,14 +114,14 @@ class JwtSecurity:
             token_type ("access" | "refresh"): Type of token
         """
         
-        _c = self.config 
+        _c = self.config ; _n = cookie_names 
         response.set_cookie(
-            key=_c.access_token_cookie if token_type == "access" else _c.refresh_token_cookie,
+            key=_n.access_token_cookie if token_type == "access" else _n.refresh_token_cookie,
             max_age=_c.access_token_life if token_type == "access" else _c.refresh_token_life,
             value=token_data.token, samesite="lax", httponly=True, secure=_c.secure
         )
         response.set_cookie(
-            key=_c.access_token_csrf if token_type == "access" else _c.refresh_token_csrf,
+            key=_n.access_token_csrf if token_type == "access" else _n.refresh_token_csrf,
             max_age=_c.access_token_life if token_type == "access" else _c.refresh_token_life,
             value=token_data.token, samesite="lax", httponly=True, secure=_c.secure
         )
@@ -164,9 +160,9 @@ class JwtSecurity:
     
     async def depend_access_token(
         self, request: Request,
-        access_token: Annotated[Union[str, None], access_cookie_depend], 
-        access_csrf: Annotated[Union[str, None], access_csrf_depend],
-        header_csrf: Annotated[Union[str, None], jwt_header_depend],
+        access_token: Annotated[Union[str, None], access_cookie_depend] = None, 
+        access_csrf: Annotated[Union[str, None], access_csrf_depend] = None,
+        header_csrf: Annotated[Union[str, None], header_csrf_depend] = None,
     ):
         """
         Function that provides depend of access token in FastAPI routes
@@ -176,7 +172,7 @@ class JwtSecurity:
             access_token, access_ and header_ csrf (Annotated[Union[str, None], api_depend]):
                 dependies to make sure that access token is correct and provided
         """
-
+        
         if access_token is None:
             raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Unauthorized. Access token is required but not provided")
 
@@ -198,9 +194,9 @@ class JwtSecurity:
     
     async def depend_refresh_token(
         self, request: Request,
-        refresh_token: Annotated[Union[str, None], refresh_cookie_depend], 
-        refresh_csrf: Annotated[Union[str, None], refresh_csrf_depend],
-        header_csrf: Annotated[Union[str, None], jwt_header_depend],
+        refresh_token: Annotated[Union[str, None], refresh_cookie_depend] = None, 
+        refresh_csrf: Annotated[Union[str, None], refresh_csrf_depend] = None,
+        header_csrf: Annotated[Union[str, None], header_csrf_depend] = None,
     ):
         """
         Function that provides depend of refresh token in FastAPI routes
@@ -210,7 +206,7 @@ class JwtSecurity:
             refresh_token, refresh_ and header_ csrf (Annotated[Union[str, None], api_depend]):
                 dependies to make sure that refresh token is correct and provided
         """
-
+        
         if refresh_token is None:
             raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Unauthorized. Refresh token is required but not provided")
 

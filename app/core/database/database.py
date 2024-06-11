@@ -8,6 +8,7 @@ class Database:
     base: Union[DeclarativeBase, None]
 
     def __init__(self) -> None:
+        self.mixin = InitialMixin
         self.base = Base
     
     def init(self, url: str):
@@ -35,3 +36,5 @@ class Database:
         """
         async with self.session() as session:
             yield session
+
+db = Database()

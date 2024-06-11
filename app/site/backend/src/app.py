@@ -1,15 +1,21 @@
+from app.core.const import getenv
+from app.core.database import db
+
 from contextlib import asynccontextmanager
 from typing import AsyncContextManager, Callable, AsyncGenerator, Any
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.site.backend.src.subapps import auth
+
 @asynccontextmanager
-async def lifespan(app: FastAPI) -> AsyncGenerator[Any, Any, Any]:
+async def lifespan(app: FastAPI) -> AsyncGenerator[Any, None]:
+    db.init(getenv("DB_URL"))
     yield
 
 def set_routers(app: FastAPI) -> None:
-    pass
+    app.include_router(auth.router)
 
 def makeapp(
     lifespan: AsyncContextManager,
