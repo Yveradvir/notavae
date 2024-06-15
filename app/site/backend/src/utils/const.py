@@ -13,7 +13,7 @@ class NoneResultedResponse(BaseModel):
     For routes that return response but data.
     """
 
-    response_type: ResponseModelTypes = ResponseModelTypes.noneresulted
+    response_type: ResponseModelTypes = ResponseModelTypes.noneresulted.value
     todo: TodoModel = TodoModel()
 
 class OneResultedResponse(BaseResponse):
@@ -22,5 +22,3 @@ class OneResultedResponse(BaseResponse):
     """
     
     subdata: Union[Any, None] = None
-
-    

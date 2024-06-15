@@ -6,3 +6,7 @@ class ASignUpRequest(BaseModel):
     password: str
     email: str
     birth: str
+
+class ASingInRequest(BaseModel):
+    username: str
+    password: str

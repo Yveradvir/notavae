@@ -1,5 +1,5 @@
 export enum ResponseModelTypes {
-    default,
+    default = 1,
     noneresulted
 }
 

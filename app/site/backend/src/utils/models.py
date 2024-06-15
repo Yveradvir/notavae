@@ -17,7 +17,7 @@ class BaseResponse(BaseModel):
     """
     Base model for all responses from this api.
     """
-    response_type: ResponseModelTypes = ResponseModelTypes.default
+    response_type: ResponseModelTypes = ResponseModelTypes.default.value
     subdata: Union[Dict, None] = {}
     todo: TodoModel = TodoModel()
 
