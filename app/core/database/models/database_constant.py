@@ -43,5 +43,15 @@ class InitialMixin(object):
 
         return data
 
+    def to_reducer_dict(self):
+        """SHOULD BE OVERWRITEN! Make self.to_dict-method version for reducer in frontend."""
+        
+        pop_data = ["password"]
+        data = self.to_dict()
+        
+        for key in pop_data:
+            data.pop(key, None)
+
+        return data
 
 Base = declarative_base()

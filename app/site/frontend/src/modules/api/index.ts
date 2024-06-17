@@ -46,7 +46,7 @@ LaunchedAxios.interceptors.response.use(
                 const refresh = cookies.get("refresh_csrf")
                 if (refresh) {
                     console.log("here");
-                    await UnlaunchedAxios.post("/auth/refresh", {}, {
+                    await UnlaunchedAxios.post("/a/refresh", {}, {
                         headers: {"X-CSRF-Token" : refresh}
                     })
                 }

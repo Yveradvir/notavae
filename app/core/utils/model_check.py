@@ -7,10 +7,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import DeclarativeMeta
 
-async def model_check_by_uuid (
+async def model_check_by_uuid(
     uuid: str, db: AsyncSession, 
     table: Type[DeclarativeMeta]
-) -> Optional[object]:
+):
     """
     Function to check if object id exists.
 
@@ -23,7 +23,6 @@ async def model_check_by_uuid (
         400 - If uuid was not similar to uuid.
         404 - If object was not found.
     """
-
     try:
         uuid = UUID(uuid)
     except ValueError:

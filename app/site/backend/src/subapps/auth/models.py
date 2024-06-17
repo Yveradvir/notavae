@@ -6,6 +6,7 @@ class ASignUpRequest(BaseModel):
     password: str
     email: str
     birth: str
+    image: str
 
 class ASingInRequest(BaseModel):
     username: str

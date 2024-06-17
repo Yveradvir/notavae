@@ -1,6 +1,5 @@
 from app.core.const import getenv
 from app.core.database import db
-from app.core.database.models import user
 
 from contextlib import asynccontextmanager
 from typing import AsyncContextManager, Callable, AsyncGenerator, Any
@@ -8,16 +7,17 @@ from typing import AsyncContextManager, Callable, AsyncGenerator, Any
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.site.backend.src.subapps import auth
+from app.site.backend.src.subapps import auth, classes, profiles
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[Any, None]:
     db.init(getenv("DB_URL"))
-    print(type(user.BadTokenTable))
     yield
 
 def set_routers(app: FastAPI) -> None:
     app.include_router(auth.router)
+    app.include_router(classes.router)
+    app.include_router(profiles.router)
 
 def makeapp(
     lifespan: AsyncContextManager,
