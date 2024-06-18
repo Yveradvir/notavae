@@ -1,7 +1,6 @@
 import React from 'react';
 import Header from './header';
-import { Container } from '@mui/material';
-
+import { Container, Box } from '@mui/material';
 
 interface Props {
     children: React.ReactNode;
@@ -9,12 +8,12 @@ interface Props {
 
 const Layout: React.FC<Props> = ({ children }) => {
     return (
-        <div>
+        <Box>
             <Header />
-            <Container>
+            <Container sx={{mt: 13}}>
                 {children}
             </Container>
-        </div>
+        </Box>
     );
 };
 

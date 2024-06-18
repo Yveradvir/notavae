@@ -1,11 +1,9 @@
 import {
     AppBar,
-    Container,
     Typography,
-    Box,
-    Fab,
-    IconButton,
+    Box
 } from "@mui/material";
+
 import { styled } from "@mui/system";
 import { alpha } from "@mui/material/styles";
 
@@ -29,10 +27,10 @@ const Header = () => {
                 boxShadow: 2,
                 bgcolor: "background.paper",
                 backgroundImage: "none",
-                padding: 1,
+                padding: 2,
             }}
         >
-            <Container
+            <Box
                 maxWidth="lg"
                 sx={{ display: "flex", alignItems: "center" }}
             >
@@ -47,11 +45,9 @@ const Header = () => {
                     </Typography>
                 </Box>
                 <Box>
-                    <Fab>
-                        <IconButton></IconButton>
-                    </Fab>
+
                 </Box>
-            </Container>
+            </Box>
         </AppBar>
     );
 };

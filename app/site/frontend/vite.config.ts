@@ -5,14 +5,10 @@ import path from 'path';
 export default defineConfig({
     root: __dirname,
     cacheDir: "./node_modules/.vite/.",
+    envDir: path.join(__dirname, "..", "..", ".."),
 
     server: {
         port: 4200,
-        host: "localhost",
-    },
-
-    preview: {
-        port: 4300,
         host: "localhost",
     },
 

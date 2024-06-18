@@ -12,6 +12,7 @@ from app.site.backend.src.subapps import auth, classes, profiles
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[Any, None]:
     db.init(getenv("DB_URL"))
+    await db.init_models()
     yield
 
 def set_routers(app: FastAPI) -> None:
