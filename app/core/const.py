@@ -1,4 +1,4 @@
-from app.core.security.jwt_security import JwtSecurity, JwtConfig
+from app.core.security.jwt_security import JwtSecurity, JwtConfig, cookie_names
 from app.core.database import db
 
 from sqlalchemy.ext.asyncio import AsyncSession, AsyncEngine

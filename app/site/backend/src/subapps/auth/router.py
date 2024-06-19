@@ -8,8 +8,9 @@ from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import NoResultFound
 
-from app.core.const import db, cryptcontext, jwtsecure
-from app.core.database.models.user import UserTable
+from app.core.const import *
+from app.core.utils.model_check import model_check_by_uuid
+from app.core.database.models.user import UserTable, BadTokenTable
 from app.site.backend.src.utils.const import NoneResultedResponse, PasswordedRequest
 from app.site.backend.src.subapps.auth.models import ASignUpRequest, ASingInRequest
 
@@ -70,8 +71,28 @@ async def a_signin(request: Request, body: ASingInRequest, db: AsyncSession = De
 
 @router.post("/signout", response_model=NoneResultedResponse, dependencies=[Depends(jwtsecure.depend_access_token)])
 async def a_signout(request: Request, body: PasswordedRequest, db: AsyncSession = Depends(db.get_session)):
-    return JSONResponse(content=NoneResultedResponse().model_dump(), status_code=200)
+    me: UserTable = await model_check_by_uuid(request.state.token["data"]["id"], db, UserTable)
+
+    if cryptcontext.verify(body.password, me.password):
+        block = [
+            BadTokenTable(uid=me.id, jti=request.cookies.get(cookie_names.access_token_cookie).split(".")[1], ttype="access"), 
+            BadTokenTable(uid=me.id, jti=request.cookies.get(cookie_names.refresh_token_cookie).split(".")[1], ttype="refresh")
+        ]
+
+        db.add_all(block)
+        await db.commit()
+
+        response = JSONResponse(content=NoneResultedResponse().model_dump(), status_code=200)
+        jwtsecure.unset_cookies(response)
+
+        return response
+    else:
+        raise HTTPException(status_code=403, detail="Invalid credentials.")
 
 @router.post("/refresh", response_model=NoneResultedResponse, dependencies=[Depends(jwtsecure.depend_refresh_token)])
 async def a_refresh(request: Request, db: AsyncSession = Depends(db.get_session)):
-    return JSONResponse(content=NoneResultedResponse().model_dump(), status_code=200)
+    response = JSONResponse(content=NoneResultedResponse().model_dump(), status_code=200)
+
+    jwtsecure.set_cookies(response, jwtsecure.create_access_token({"id": str(request.state.token["data"]["id"])}), "access")
+    
+    return response

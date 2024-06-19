@@ -10,6 +10,10 @@ from app.core.security.models.jwt_constant import SecurityPayloadReturn, Securit
 
 import jwt
 
+from app.core.database import db
+from app.core.database.models.user import BadTokenTable
+from app.core.database.models.database_constant import select
+
 cookie_names = CookieNames()
 
 access_cookie_depend = Depends(APIKeyCookie(name=cookie_names.access_token_cookie, scheme_name=cookie_names.access_token_cookie, description="Access token in cookies"))
@@ -140,6 +144,20 @@ class JwtSecurity:
             value=token_data.csrf, httponly=False, samesite="lax", secure=_c.secure
         )
     
+    def unset_cookies(self, response: Response):
+        """
+        Unset tokens.
+
+        Parameters: 
+            response (Response): Response instance for unsetting cookies
+        """
+
+        for key in cookie_names.model_dump().values():
+            response.delete_cookie(
+                key=key, secure=self.config.secure, samesite="lax",
+                httponly=not key.endswith("_csrf")
+            )
+
     def verify(self, token: str) -> SecurityPayloadReturn.Payload:
         """
         Verify jwt token
@@ -197,6 +215,15 @@ class JwtSecurity:
         token = self.verify(access_token)
 
         if token:
+            async with db.engine.begin() as conn:
+                is_bad_token = (await conn.execute(
+                    select(BadTokenTable)
+                        .where(BadTokenTable.ttype == "access")
+                        .where(BadTokenTable.jti == access_token.split(".")[1])
+                )).scalar_one_or_none()
+
+                if is_bad_token: raise HTTPException(status.HTTP_403_FORBIDDEN, "Token is in black list")
+
             if token["csrf"] == access_csrf == header_csrf:
                 trg = token.get("trg", None)
                 if trg:
@@ -231,8 +258,16 @@ class JwtSecurity:
         token = self.verify(refresh_token)
 
         if token:
+            async with db.engine.begin() as conn:
+                is_bad_token = (await conn.execute(
+                    select(BadTokenTable)
+                        .where(BadTokenTable.ttype == "refresh")
+                        .where(BadTokenTable.jti == refresh_token.split(".")[1])
+                )).scalar_one_or_none()
+
+                if is_bad_token: raise HTTPException(status.HTTP_403_FORBIDDEN, "Token is in black list")
+
             if token["csrf"] == refresh_csrf == header_csrf:                
                 request.state.token = token
             else:
                 raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Csrf tokens aren't match")
-        
