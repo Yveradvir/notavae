@@ -22,6 +22,9 @@ const SignUpForm: React.FC = () => {
     ) => {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const {confirm, ...body} = values
+        body.birth = new Date(body.birth).toISOString()
+        console.log(body.birth);
+        
         try {
             const response = await LaunchedAxios.post("/a/signup", body)
             

@@ -2,6 +2,7 @@ from app.core.security.jwt_security import JwtSecurity, JwtConfig
 from app.core.database import db
 
 from sqlalchemy.ext.asyncio import AsyncSession, AsyncEngine
+from sqlalchemy.orm import selectinload
 from sqlalchemy import select, delete
 
 from passlib.context import CryptContext
@@ -16,7 +17,7 @@ load_dotenv(
     )
 )
 
-cryptcontext = CryptContext()
+cryptcontext = CryptContext(schemes=["bcrypt"], deprecated="auto")
 jwtsecure = JwtSecurity(
     JwtConfig(
         secret_key=getenv("SECRET_KEY")

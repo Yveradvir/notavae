@@ -11,7 +11,7 @@ class UserTable(db.base, db.mixin):
     password = Column(String, nullable=False)
     email = Column(String, nullable=False, unique=True)
     birth = Column(Date, nullable=False)
-    image = Column(LargeBinary, nullable=False)
+    image = Column(LargeBinary, nullable=True)
 
     badtokens = relationship("BadTokenTable", uselist=True, cascade="all, delete-orphan")
 
