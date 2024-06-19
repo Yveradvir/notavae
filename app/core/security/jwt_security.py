@@ -128,16 +128,16 @@ class JwtSecurity:
             token_type ("access" | "refresh"): Type of token
         """
         
-        _c = self.config ; _n = cookie_names ; standart = {"samesite":"lax", "httponly":True, "secure":_c.secure}
+        _c = self.config ; _n = cookie_names
         response.set_cookie(
             key=_n.access_token_cookie if token_type == "access" else _n.refresh_token_cookie,
             max_age=_c.access_token_life if token_type == "access" else _c.refresh_token_life,
-            value=token_data.token, **standart
+            value=token_data.token, httponly=True, samesite="lax", secure=_c.secure
         )
         response.set_cookie(
             key=_n.access_token_csrf if token_type == "access" else _n.refresh_token_csrf,
             max_age=_c.access_token_life if token_type == "access" else _c.refresh_token_life,
-            value=token_data.csrf, **standart
+            value=token_data.csrf, httponly=False, samesite="lax", secure=_c.secure
         )
     
     def verify(self, token: str) -> SecurityPayloadReturn.Payload:

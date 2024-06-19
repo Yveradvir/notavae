@@ -1,5 +1,8 @@
 import axios, { AxiosError } from "axios";
 import cookies from '../utils/cookies';
+import { check_YvesResponse } from "@modules/utils/check_funcs";
+import { todo_execution } from "./actions";
+import { TodoModel } from "@modules/constants/api.const";
 
 export const UnlaunchedAxios = axios.create({
     baseURL: import.meta.env.VITE_API, withCredentials: true
@@ -36,6 +39,8 @@ LaunchedAxios.interceptors.response.use(
     async response => {
         if (import.meta.env.DEV) console.log("[ LaunchedAxios:response::use#fulfilled > ", response);
         
+        if (check_YvesResponse(response)) todo_execution(response.data.todo as TodoModel)
+
         return response
     },
     async error => {

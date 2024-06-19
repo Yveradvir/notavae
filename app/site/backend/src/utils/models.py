@@ -11,7 +11,7 @@ class TodoModel(BaseModel):
     """
     A model that indicates to the frontend the actions that need to be performed
     """
-    pass
+    user_profile_update: bool = False
 
 class BaseResponse(BaseModel):
     """

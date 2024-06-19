@@ -1,8 +1,11 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { useDispatch, useSelector } from "react-redux";
+import { PROFILE_FEATURE_KEY, profileReducer } from "./slices/profile";
 
 export const store = configureStore({
-    reducer: {},
+    reducer: {
+        [PROFILE_FEATURE_KEY]: profileReducer
+    },
     middleware: (getDefaultMiddleware) => getDefaultMiddleware(),
     devTools: import.meta.env.DEV
 });
