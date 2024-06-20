@@ -135,12 +135,12 @@ class JwtSecurity:
         _c = self.config ; _n = cookie_names
         response.set_cookie(
             key=_n.access_token_cookie if token_type == "access" else _n.refresh_token_cookie,
-            max_age=_c.access_token_life if token_type == "access" else _c.refresh_token_life,
+            max_age=int(_c.access_token_life) if token_type == "access" else int(_c.refresh_token_life),
             value=token_data.token, httponly=True, samesite="lax", secure=_c.secure
         )
         response.set_cookie(
             key=_n.access_token_csrf if token_type == "access" else _n.refresh_token_csrf,
-            max_age=_c.access_token_life if token_type == "access" else _c.refresh_token_life,
+            max_age=int(_c.access_token_life) if token_type == "access" else int(_c.refresh_token_life),
             value=token_data.csrf, httponly=False, samesite="lax", secure=_c.secure
         )
     

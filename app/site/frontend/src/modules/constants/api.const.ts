@@ -5,4 +5,5 @@ export enum ResponseModelTypes {
 
 export interface TodoModel {
     user_profile_update: boolean
+    user_profile_unset: boolean
 }

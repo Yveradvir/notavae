@@ -12,6 +12,7 @@ class TodoModel(BaseModel):
     A model that indicates to the frontend the actions that need to be performed
     """
     user_profile_update: bool = False
+    user_profile_unset: bool = False
 
 class BaseResponse(BaseModel):
     """

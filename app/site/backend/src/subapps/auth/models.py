@@ -11,3 +11,7 @@ class ASignUpRequest(BaseModel):
 class ASingInRequest(BaseModel):
     username: str
     password: str
+
+class AChangePasswordRequest(BaseModel):
+    password: str
+    new_password: str

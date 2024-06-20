@@ -22,3 +22,18 @@ export interface ProfileState {
         profileImage: RejectedError | null;
     }
 }
+
+export const profileInitialState = {
+    instances: {
+        profileEntity: null,
+        profileImage: null,
+    },
+    loadings: {
+        profileEntity: LoadingStatus.ANotLoaded,
+        profileImage: LoadingStatus.ANotLoaded,
+    },
+    errors: {
+        profileEntity: null,
+        profileImage: null,
+    },
+} 

@@ -1,4 +1,4 @@
-from fastapi import Request, Depends
+from fastapi import Request, Depends, Query
 
 from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.routing import APIRouter
@@ -17,6 +17,13 @@ router.include_router(single_router)
 
 @router.get(path="/my", dependencies=[Depends(jwtsecure.depend_access_token)])
 async def profiles_my(
-    request: Request
+    request: Request, act: int = Query(0)
 ):
-    return RedirectResponse(url=f"/p/single/{request.state.token["data"]["id"]}", status_code=307)
+    url = f"/p/single/{request.state.token["data"]["id"]}"
+    
+    if act == 0:
+        return RedirectResponse(url, status_code=307)
+    elif act == 1:
+        return RedirectResponse(f"{url}/image", status_code=307)
+    else:
+        return JSONResponse(status_code=400, content={"message": "Invalid 'act' value"})

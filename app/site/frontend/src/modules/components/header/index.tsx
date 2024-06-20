@@ -12,11 +12,13 @@ import { styled } from "@mui/system";
 import { alpha } from "@mui/material/styles";
 import { useCallback, useState } from "react";
 
-import { AccountCircleOutlined, LoginOutlined, LogoutOutlined, PersonAddAlt1Outlined, VpnKeyOutlined } from '@mui/icons-material';
+import { AccountCircleOutlined, DuoOutlined, LoginOutlined, LogoutOutlined, PersonAddAlt1Outlined, VpnKeyOutlined } from '@mui/icons-material';
 import { useNavigate } from "react-router-dom";
 import { isAuthenticated } from "@modules/utils/cookies";
 import PasswordedModal from "./modals/passworded";
 import { LaunchedAxios } from "@modules/api";
+import ChangePasswordModal from "./modals/change_password";
+import { useAppSelector } from "@modules/reducers";
 
 const LogoBox = styled(Box)(({ theme }) => ({
     width: "45px",
@@ -32,14 +34,24 @@ const LogoBox = styled(Box)(({ theme }) => ({
 
 const Header = () => {
     const navigate = useNavigate();
+    const selector = useAppSelector(state => state)
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-    
+
     const [logout, setLogout] = useState<boolean>(false);
     const logoutCallback = useCallback(async (password: string) => {
         const response = await LaunchedAxios.post("/a/signout", {password})
 
         if (response.status === 200) {
             setLogout(false);
+        }
+    }, [])
+
+    const [changePassword, setChangePassword] = useState<boolean>(false);
+    const changePasswordCallback = useCallback(async (body: object) => {
+        const response = await LaunchedAxios.patch("/a/password_change", body)
+ 
+        if (response.status === 200) {
+            setChangePassword(false);
         }
     }, [])
 
@@ -78,33 +90,41 @@ const Header = () => {
                     variant="outlined"
                     onClick={handleChipClick}
                     sx={{ cursor: "pointer" }}
+                    />
+                <Chip
+                    label=""
+                    icon={<DuoOutlined color="warning"/>}
+                    color="warning"
+                    variant="outlined"
+                    onClick={() => console.log(selector)}
+                    sx={{ cursor: "pointer" }}
                 />
                 <Menu
                     anchorEl={anchorEl}
                     open={Boolean(anchorEl)}
                     onClose={() => setAnchorEl(null)}
                 >
-                    <MenuItem onClick={() => handleClose("/a/signin")}>
-                        <ListItemIcon>
-                            <LoginOutlined color="primary"/>
-                        </ListItemIcon>
-                        <ListItemText
-                            primary="Sign In"
-                            sx={{ color: "primary.main" }}
-                        />
-                    </MenuItem>
-                    <MenuItem onClick={() => handleClose("/a/signup")}>
-                        <ListItemIcon>
-                            <PersonAddAlt1Outlined color="primary"/>
-                        </ListItemIcon>
-                        <ListItemText
-                            primary="Sign Up"
-                            sx={{ color: "primary.main" }}
-                        />
-                    </MenuItem>
-                    {isAuthenticated() && (
-                        <>
-                            <MenuItem onClick={() => handleClose("/a/change_password")}>
+                    {[
+                        <MenuItem key="signin" onClick={() => handleClose("/a/signin")}>
+                            <ListItemIcon>
+                                <LoginOutlined color="primary"/>
+                            </ListItemIcon>
+                            <ListItemText
+                                primary="Sign In"
+                                sx={{ color: "primary.main" }}
+                            />
+                        </MenuItem>,
+                        <MenuItem key="signup" onClick={() => handleClose("/a/signup")}>
+                            <ListItemIcon>
+                                <PersonAddAlt1Outlined color="primary"/>
+                            </ListItemIcon>
+                            <ListItemText
+                                primary="Sign Up"
+                                sx={{ color: "primary.main" }}
+                            />
+                        </MenuItem>,
+                        isAuthenticated() && (
+                            <MenuItem key="change-password" onClick={() => setChangePassword(true)}>
                                 <ListItemIcon>
                                     <VpnKeyOutlined color="warning"/>
                                 </ListItemIcon>
@@ -113,7 +133,9 @@ const Header = () => {
                                     sx={{ color: "warning.main" }}
                                 />
                             </MenuItem>
-                            <MenuItem onClick={() => setLogout(true)}>
+                        ),
+                        isAuthenticated() && (
+                            <MenuItem key="logout" onClick={() => setLogout(true)}>
                                 <ListItemIcon>
                                     <LogoutOutlined color="error"/>
                                 </ListItemIcon>
@@ -122,11 +144,12 @@ const Header = () => {
                                     sx={{ color: "error.main" }}
                                 />
                             </MenuItem>
-                        </>
-                    )}
+                        )
+                    ]}
                 </Menu>
             </Box>
             <PasswordedModal open={logout} onClose={() => setLogout(false)} callback={logoutCallback}/>
+            <ChangePasswordModal open={changePassword} onClose={() => setChangePassword(false)} callback={changePasswordCallback} />
         </AppBar>
     );
 };

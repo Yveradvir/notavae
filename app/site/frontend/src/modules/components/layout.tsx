@@ -1,6 +1,6 @@
 import React from 'react';
-import Header from './header';
 import { Container, Box } from '@mui/material';
+import Header from './header';
 
 interface Props {
     children: React.ReactNode;

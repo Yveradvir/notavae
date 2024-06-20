@@ -20,7 +20,7 @@ class InitialMixin(object):
         onupdate=lambda: datetime.now(timezone.utc)
     )
 
-    def to_dict(self):
+    def to_dict(self, excludes: list = []) -> dict:
         """Converts the SQLAlchemy model instance to a dictionary."""
         data = {}
 
@@ -41,17 +41,13 @@ class InitialMixin(object):
             else:
                 data[col.name] = getattr(self, col.name)
 
-        return data
-
-    def to_reducer_dict(self):
-        """SHOULD BE OVERWRITEN! Make self.to_dict-method version for reducer in frontend."""
-        
-        pop_data = ["password"]
-        data = self.to_dict()
-        
-        for key in pop_data:
+        for key in excludes:
             data.pop(key, None)
 
         return data
+
+    def to_reducer_dict(self, excludes: list = ["password", "image"]) -> dict:
+        """Return reducer dictionary. """
+        return self.to_dict(excludes)
 
 Base = declarative_base()

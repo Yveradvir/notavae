@@ -18,6 +18,7 @@ class UserTable(db.base, db.mixin):
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
 
+
 class BadTokenTable(db.base, db.mixin):
     __tablename__ = 'badtokens'
 

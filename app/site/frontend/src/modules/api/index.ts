@@ -1,7 +1,7 @@
 import axios, { AxiosError } from "axios";
 import cookies from '../utils/cookies';
 import { check_YvesResponse } from "@modules/utils/check_funcs";
-import { todo_execution } from "./actions";
+import { error_execution, todo_execution } from "./actions";
 import { TodoModel } from "@modules/constants/api.const";
 
 export const UnlaunchedAxios = axios.create({
@@ -39,24 +39,14 @@ LaunchedAxios.interceptors.response.use(
     async response => {
         if (import.meta.env.DEV) console.log("[ LaunchedAxios:response::use#fulfilled > ", response);
         
-        if (check_YvesResponse(response)) todo_execution(response.data.todo as TodoModel)
+        if (check_YvesResponse(response)) await todo_execution(response.data.todo as TodoModel)
 
         return response
     },
     async error => {
         if (import.meta.env.DEV) console.error("[ LaunchedAxios:response::use#rejected > ", error);
 
-        if (error instanceof AxiosError) {            
-            if (error.response?.status === 401) {
-                const refresh = cookies.get("refresh_csrf")
-                if (refresh) {
-                    console.log("here");
-                    await UnlaunchedAxios.post("/a/refresh", {}, {
-                        headers: {"X-CSRF-Token" : refresh}
-                    })
-                }
-            }
-        }
+        if (error instanceof AxiosError) await error_execution(error, UnlaunchedAxios)
 
         return Promise.reject(error)        
     }

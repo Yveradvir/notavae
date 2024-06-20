@@ -10,12 +10,12 @@ import { RejectedError } from "@modules/constants/rejector.const";
 import { LoadingStatus } from "@modules/constants/reducers.conts";
 
 export const loadMyProfile = createAsyncThunk<ProfileEntity>(
-    "profile/get",
+    "profile/load",
     async (_, thunkAPI) => {
         try {
-            const response = await LaunchedAxios.get("/p/my");
+            const response = await LaunchedAxios.get("/p/my", {params: {act: 0}});
 
-            if (response.data.ok) {
+            if (response.status === 200) {
                 return response.data.subdata as ProfileEntity;
             } else {
                 return thunkAPI.rejectWithValue(Rejector.standartReject());

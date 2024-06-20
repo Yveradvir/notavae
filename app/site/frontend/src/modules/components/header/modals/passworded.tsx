@@ -1,7 +1,6 @@
-import { Box, Button, Dialog, DialogContent, TextField } from "@mui/material";
+import { Box, Button, Dialog, DialogContent, DialogTitle, TextField, Typography } from "@mui/material";
 import { PasswordedSchema, PasswordedValues } from "./validation/passworded.vd";
 import { Formik, Form, Field, FormikHelpers } from "formik";
-import { LaunchedAxios } from "@modules/api";
 import { check_error } from "@modules/utils/check_funcs";
 import { AxiosError } from "axios";
 import { useState } from "react";
@@ -25,13 +24,7 @@ const PasswordedModal: React.FC<PasswordedModalI> = ({
         actions: FormikHelpers<PasswordedValues>
     ) => {
         try {
-            const response = await LaunchedAxios.post("/a/password_check", {
-                password: values.password,
-            });
-
-            if (response.status === 200) {
-                callback(values.password);
-            }
+            callback(values.password);
         } catch (error) {
             if (error instanceof AxiosError) {
                 setGlobalError(check_error(error));
@@ -43,6 +36,9 @@ const PasswordedModal: React.FC<PasswordedModalI> = ({
 
     return (
         <Dialog open={open} onClose={onClose}>
+            <DialogTitle>
+                <Typography>You need to confirm this action</Typography>
+            </DialogTitle>
             <DialogContent>
                 <Formik
                     initialValues={initialValues}
