@@ -1,6 +1,7 @@
 from sqlalchemy import Column, ForeignKey, select, delete
 
 from sqlalchemy.ext.asyncio import AsyncSession, AsyncEngine, async_sessionmaker, create_async_engine
+from sqlalchemy.orm import configure_mappers
 from sqlalchemy.orm import declarative_base, relationship, DeclarativeBase
 from sqlalchemy.types import Uuid, UUID, DateTime, Date, LargeBinary, Integer, Text, String
 

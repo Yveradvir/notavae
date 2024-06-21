@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-from typing import Dict, Union
+from typing import Dict, List, Union
 from enum import Enum, auto
 
 class ResponseModelTypes(Enum):
@@ -19,7 +19,7 @@ class BaseResponse(BaseModel):
     Base model for all responses from this api.
     """
     response_type: ResponseModelTypes = ResponseModelTypes.default.value
-    subdata: Union[Dict, None] = {}
+    subdata: Union[Dict, List, None] = {}
     todo: TodoModel = TodoModel()
 
 

@@ -5,7 +5,7 @@ from fastapi import HTTPException
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from sqlalchemy.orm import DeclarativeMeta
+from sqlalchemy.orm import DeclarativeMeta, selectinload
 
 async def model_check_by_uuid(
     uuid: str, db: AsyncSession, 
@@ -33,6 +33,7 @@ async def model_check_by_uuid(
     scalar: table = (await db.execute(
         select(table)
             .where(table.id == uuid)
+            .options(selectinload("*"))
     )).scalar_one_or_none()
 
     if not scalar:

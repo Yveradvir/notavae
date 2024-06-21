@@ -12,7 +12,7 @@ import jwt
 
 from app.core.database import db
 from app.core.database.models.user import BadTokenTable
-from app.core.database.models.database_constant import select
+from app.core.database.database_constant import select
 
 cookie_names = CookieNames()
 
