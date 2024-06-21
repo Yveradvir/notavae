@@ -7,7 +7,7 @@ from typing import AsyncContextManager, Callable, AsyncGenerator, Any
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.site.backend.src.subapps import auth, classes, profiles
+from app.site.backend.src.subapps import auth, courses, profiles
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[Any, None]:
@@ -17,7 +17,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[Any, None]:
 
 def set_routers(app: FastAPI) -> None:
     app.include_router(auth.router)
-    app.include_router(classes.router)
+    app.include_router(courses.router)
     app.include_router(profiles.router)
 
 def makeapp(

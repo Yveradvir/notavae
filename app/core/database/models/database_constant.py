@@ -46,8 +46,10 @@ class InitialMixin(object):
 
         return data
 
-    def to_reducer_dict(self, excludes: list = ["password", "image"]) -> dict:
+    def to_reducer_dict(self) -> dict:
         """Return reducer dictionary. """
+        excludes: list = ["password", "image"]
+        
         return self.to_dict(excludes)
 
 Base = declarative_base()
