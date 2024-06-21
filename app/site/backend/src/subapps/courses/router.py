@@ -24,13 +24,15 @@ router = APIRouter(
 router.include_router(single_router)
 
 @router.post(path="/new", response_model=OneResultedResponse, dependencies=[Depends(jwtsecure.depend_access_token)])
-async def classes_new(
+async def courses_new(
     request: Request, body: CoursesCourseNewModel,
     db: AsyncSession = Depends(db.get_session)
 ):
-    me: UserTable = await model_check_by_uuid(request.state.token["data"]["id"], db, CourseTable)
+    me: UserTable = await model_check_by_uuid(request.state.token["data"]["id"], db, UserTable)
     course: CourseTable = (await db.execute(
-        select(CourseTable).where(CourseTable.name == body.name)
+        select(CourseTable)
+            .where(CourseTable.name == body.name)
+            .options(selectinload(CourseTable.author))
     )).scalar_one_or_none()
 
     if not course:
@@ -51,7 +53,8 @@ async def classes_new(
 
         db.add(new_course)
         await db.commit()
-
+        await db.refresh(new_course)
+        
         return JSONResponse(OneResultedResponse(subdata=str(new_course.id)).model_dump(), 201)
     else: 
-        raise HTTPException(409, "Class arleady exist.")
+        raise HTTPException(409, "Course arleady exist.")

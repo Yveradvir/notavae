@@ -31,7 +31,8 @@ async def model_check_by_uuid(
         )
     
     scalar: table = (await db.execute(
-        select(table).where(table.id == uuid)
+        select(table)
+            .where(table.id == uuid)
     )).scalar_one_or_none()
 
     if not scalar:

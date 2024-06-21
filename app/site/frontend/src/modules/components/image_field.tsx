@@ -8,7 +8,7 @@ import {
     Box,
 } from "@mui/material";
 
-const ImageField: React.FC = () => {
+const ImageField: React.FC<{field?: string}> = ({field = "image"}) => {
     const { setFieldValue } = useFormikContext();
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
@@ -24,7 +24,7 @@ const ImageField: React.FC = () => {
                         if (file) {
                             const reader = new FileReader();
                             reader.onloadend = () => {
-                                setFieldValue("image", reader.result);
+                                setFieldValue(field, reader.result);
                                 setImagePreview(reader.result as string);
                             };
                             reader.readAsDataURL(file);
@@ -33,7 +33,7 @@ const ImageField: React.FC = () => {
                 }
             }
         },
-        [setFieldValue]
+        [setFieldValue, field]
     );
 
     const handleChange = useCallback(
@@ -42,13 +42,13 @@ const ImageField: React.FC = () => {
             if (file) {
                 const reader = new FileReader();
                 reader.onloadend = () => {
-                    setFieldValue("image", reader.result);
+                    setFieldValue(field, reader.result);
                     setImagePreview(reader.result as string);
                 };
                 reader.readAsDataURL(file);
             }
         },
-        [setFieldValue]
+        [setFieldValue, field]
     );
 
     const handleClick = () => {
@@ -56,7 +56,7 @@ const ImageField: React.FC = () => {
     };
 
     const handleCancel = () => {
-        setFieldValue("image", "");
+        setFieldValue(field, "");
         setImagePreview(null);
     };
 

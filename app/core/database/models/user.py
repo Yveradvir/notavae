@@ -14,6 +14,14 @@ class UserTable(db.base, db.mixin):
     image = Column(LargeBinary, nullable=True)
 
     badtokens = relationship("BadTokenTable", uselist=True, cascade="all, delete-orphan")
+    memberships = relationship(
+        "MembershipTable", 
+        primaryjoin="UserTable.id == MembershipTable.user_id",
+        foreign_keys="[MembershipTable.user_id]",
+        back_populates="user", 
+        uselist=True, 
+        cascade="all, delete-orphan"
+    )
 
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)

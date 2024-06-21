@@ -38,3 +38,12 @@ export function check_error(error: AxiosError<ErrorResponse>): string {
 
     return "Something went wrong.";
 }
+
+export function check_for_groups(path: string): boolean {
+    const path_array: string[] = path.split("/")
+    
+    console.log(path_array);
+
+    return !path_array.includes("a")
+        && !path_array.includes("new")
+}
