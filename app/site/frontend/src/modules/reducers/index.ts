@@ -1,7 +1,7 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { useDispatch, useSelector } from "react-redux";
 import { PROFILE_FEATURE_KEY, profileReducer } from "./slices/profile";
-import { MY_COURSES_FEATURE_KEY, myCoursesReducer } from "./slices/my_courses";
+import { MY_COURSES_FEATURE_KEY, myCoursesReducer } from "./slices/courses/my_courses";
 
 export const store = configureStore({
     reducer: {

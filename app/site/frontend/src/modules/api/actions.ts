@@ -6,12 +6,20 @@ import cookies from "@modules/utils/cookies";
 import { loadMyProfileImage } from "@modules/reducers/slices/profile/thunks/load_my_pfp.thunk";
 import { loadMyProfile } from "@modules/reducers/slices/profile/thunks/load_my_profile.thunk";
 import { profileActions } from "@modules/reducers/slices/profile";
+import { loadMyCourses } from "@modules/reducers/slices/courses/my_courses/thunks/load_my_courses.thunk";
 
 export async function todo_execution(todo: TodoModel): Promise<void> {
     if (todo.user_profile_update) {
         await store.dispatch(loadMyProfile());
         await store.dispatch(loadMyProfileImage());
-    } else if (todo.user_profile_unset) {
+    } 
+    if (todo.user_profile_unset) {
+        store.dispatch(profileActions.reset())
+    }
+    if (todo.my_courses_update) {
+        await store.dispatch(loadMyCourses());
+    }
+    if (todo.my_courses_unset) {
         store.dispatch(profileActions.reset())
     }
 }

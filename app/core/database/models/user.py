@@ -19,6 +19,9 @@ class UserTable(Base, InitialMixin):
         uselist=True, cascade="all, delete-orphan"
     )
 
+    def to_reducer_dict(self) -> dict:
+        return self.to_dict(["image", "password"])
+
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
 

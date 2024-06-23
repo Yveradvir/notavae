@@ -13,6 +13,8 @@ class TodoModel(BaseModel):
     """
     user_profile_update: bool = False
     user_profile_unset: bool = False
+    my_courses_update: bool = False
+    my_courses_unset: bool = False
 
 class BaseResponse(BaseModel):
     """
