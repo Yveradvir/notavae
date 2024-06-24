@@ -13,7 +13,7 @@ from app.core.database.models.memberships import MembershipTable
 from app.core.utils.model_check import model_check_by_uuid
 from app.core.utils.membership_actions import is_user_in
 
-from app.site.backend.src.utils.const import OneResultedResponse, PasswordedRequest, BaseResponse
+from app.site.backend.src.utils.const import OneResultedResponse, PasswordedRequest, BaseResponse, TodoModel
 from app.site.backend.src.subapps.courses.models import CoursesCourseNewModel
 
 
@@ -25,7 +25,8 @@ membership_router = APIRouter(
 
 @membership_router.post(path="/join", response_model=BaseResponse, dependencies=[Depends(jwtsecure.depend_access_token)])
 async def single_course__memberships__join(
-    request: Request, instance_id: Annotated[str, Path(...)],
+    request: Request, body: PasswordedRequest,
+    instance_id: Annotated[str, Path(...)],
     db: AsyncSession = Depends(db.get_session)
 ):
     instance: CourseTable = await model_check_by_uuid(instance_id, db, CourseTable)
@@ -33,6 +34,10 @@ async def single_course__memberships__join(
     membership: MembershipTable = await is_user_in(db, me.id, instance.id)
 
     if not membership:
+        if instance.password:
+            if cryptcontext.verify(body, instance.password) == False:
+                raise HTTPException(403, "Invalid credentials")
+
         new_membership = MembershipTable(
             user_id = me.id, course_id=instance.id
         )
@@ -42,7 +47,12 @@ async def single_course__memberships__join(
         await db.commit()
         await db.refresh(new_membership)
 
-        return JSONResponse(BaseResponse(subdata=new_membership.course.to_reducer_dict()), 201)
+        return JSONResponse(
+            BaseResponse(
+                subdata=new_membership.course.to_reducer_dict(),
+                todo=TodoModel()
+            ), 201
+        )
     else:
         raise HTTPException(409, "You are arleady a member of this group")
 
@@ -62,6 +72,13 @@ async def single_course__memberships__leave(
         
         await db.commit()
 
-        return JSONResponse(OneResultedResponse(subdata=_id), 201)
+        return JSONResponse(
+            OneResultedResponse(
+                subdata=_id,
+                todo=TodoModel(
+                    my_courses_update=True
+                )
+            ), 201
+        )
     else:
         raise HTTPException(409, "You are arleady a member of this group")

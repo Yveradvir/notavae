@@ -1,5 +1,6 @@
 from app.core.security.jwt_security import JwtSecurity, JwtConfig, cookie_names
 from app.core.database import db
+from app.core.settings import CoreSettings
 
 from sqlalchemy.ext.asyncio import AsyncSession, AsyncEngine
 from sqlalchemy.orm import selectinload
@@ -22,4 +23,8 @@ jwtsecure = JwtSecurity(
     JwtConfig(
         secret_key=getenv("SECRET_KEY")
     )
+)
+settings = CoreSettings(
+    max_memberships_per_user=15,
+    pagination_unit=5
 )

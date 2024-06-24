@@ -62,3 +62,11 @@ async def check_single_profile_password(
         return JSONResponse(NoneResultedResponse().model_dump(), 200)
     else:
         raise HTTPException(403, "Passwords do not match.")
+    
+@single_router.get("/courses", response_model=BaseResponse, tags=["courses"])
+async def single_profile_courses(
+    request: Request, instance_id: Annotated[str, Path(...)],
+    db: AsyncSession = Depends(db.get_session)
+):
+    
+    return JSONResponse()

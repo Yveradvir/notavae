@@ -1,11 +1,12 @@
 import { LaunchedAxios } from "@modules/api";
 import { Rejector } from "@modules/reducers/rejector";
 import { createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
-import { MyCourseEntity, myCoursesAdapter, MyCoursesState } from "../const";
 import { LoadingStatus } from "@modules/constants/reducers.conts";
 import { RejectedError } from "@modules/constants/rejector.const";
+import { CourseEntity } from "../../const";
+import { findCoursesAdapter, FindCoursesState } from "../const";
 
-export const loadMyCourses = createAsyncThunk<MyCourseEntity[]>(
+export const loadFindCourses = createAsyncThunk<CourseEntity[]>(
     "my_courses/load",
     async (_, thunkAPI) => {
         try {
@@ -24,21 +25,21 @@ export const loadMyCourses = createAsyncThunk<MyCourseEntity[]>(
     }
 );
 
-export const loadMyCourses__Pending = (state: MyCoursesState) => {
+export const loadFindCourses__Pending = (state: FindCoursesState) => {
     state.loading = LoadingStatus.Loading;
 };
 
-export const loadMyCourses__Fulfilled = (
-    state: MyCoursesState,
-    action: PayloadAction<MyCourseEntity[]>
+export const loadFindCourses__Fulfilled = (
+    state: FindCoursesState,
+    action: PayloadAction<CourseEntity[]>
 ) => {
-    myCoursesAdapter.setAll(state, action.payload);
+    findCoursesAdapter.addMany(state, action.payload);
     state.loading = LoadingStatus.Loaded;
     state.error = null;
 };
 
-export const loadMyCourses__Rejected = (
-    state: MyCoursesState,
+export const loadFindCourses__Rejected = (
+    state: FindCoursesState,
     action: { payload: unknown } // vscode gave me an error without it.
 ) => {
     state.error = action.payload as RejectedError;
