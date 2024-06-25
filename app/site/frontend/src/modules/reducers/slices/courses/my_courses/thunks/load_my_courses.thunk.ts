@@ -10,13 +10,10 @@ export const loadMyCourses = createAsyncThunk<CourseEntity[]>(
     "my_courses/load",
     async (_, thunkAPI) => {
         try {
-            const response = await LaunchedAxios.get("/c/my");
+            const state = thunkAPI.getState() as {profile: {instances: {profileEntity: {id: string}}}, my_courses: {filters: object}}
+            const response = await LaunchedAxios.get(`/p/single/${state.profile.instances.profileEntity.id}/courses`, {params: state.my_courses.filters});
 
-            if (response.status === 200) {
-                return response.data.subdata;
-            } else {
-                return thunkAPI.rejectWithValue(Rejector.standartReject());
-            }
+            return response.data.subdata;
         } catch (error) {
             return thunkAPI.rejectWithValue(
                 Rejector.standartAxiosReject(error)

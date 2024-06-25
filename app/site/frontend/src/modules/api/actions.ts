@@ -28,7 +28,7 @@ export async function error_execution(
     error: AxiosError,
     UnlaunchedAxios: Axios
 ): Promise<void> {
-    if (error.response?.status === 401) {
+    async function refresh_token() {
         const refresh = cookies.get("refresh_csrf");
         if (refresh) {
             console.log("here");
@@ -39,6 +39,17 @@ export async function error_execution(
                     headers: { "X-CSRF-Token": refresh },
                 }
             );
+        }    
+    }
+
+    if (error.response?.status === 401) {
+        await refresh_token()
+    } else if (error.response?.status === 403) {
+        if (error.response.data) {
+            const data = error.response.data as {detail: string}
+            if (data.detail === "Not authenticated") {
+                await refresh_token()
+            }
         }
     }
 }

@@ -2,14 +2,20 @@ import {
     AppBar,
     Typography,
     Box,
+    Chip,
 } from "@mui/material";
 
 import { LogoBox } from "./components";
 import AccountChip from "./account_chip";
 import { isAuthenticated } from "@modules/utils/cookies";
 import CoursesChip from "./courses_chip";
+import { useAppSelector } from "@modules/reducers";
+import { useCallback } from "react";
 
 const Header = () => {
+    const { my_courses, profile } = useAppSelector(state => state)
+    const getData = useCallback(() => {console.log(my_courses, profile)}, [my_courses, profile])
+
     return (
         <AppBar
             position="fixed"
@@ -33,6 +39,7 @@ const Header = () => {
                 </Box>
                 <Box sx={{ flexGrow: 1 }} />
                 <AccountChip />
+                <Chip label="Get data" onClick={getData}/>
                 {isAuthenticated() && <CoursesChip/>}
             </Box>
         </AppBar>

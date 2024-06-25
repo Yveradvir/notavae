@@ -20,11 +20,13 @@ import { CourseEntity } from "@modules/reducers/slices/courses/const";
 const MyCoursesPage = () => {
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
-    const { entities, error, loading } = useAppSelector(
+    const { entities, error, loading, ids } = useAppSelector(
         (state) => state.my_courses
     );
 
     useEffect(() => {
+        console.log(entities, error);
+        
         const fetchCourses = async () => {
             if (
                 !entities.length &&
@@ -49,7 +51,7 @@ const MyCoursesPage = () => {
             return <CircularProgress />;
         }
 
-        if (loading === LoadingStatus.Loaded && !entities.length) {
+        if (loading === LoadingStatus.Loaded && !ids.length) {
             return (
                 <div>
                     <Typography variant="h6">
@@ -59,7 +61,7 @@ const MyCoursesPage = () => {
                     <Button
                         variant="contained"
                         color="primary"
-                        onClick={() => navigate("/search")}
+                        onClick={() => navigate("/c/find")}
                     >
                         Search Courses
                     </Button>
@@ -67,33 +69,35 @@ const MyCoursesPage = () => {
             );
         }
 
-        return Object(entities).values.map((course: CourseEntity) => (
-            <Accordion key={course.id}>
-                <AccordionSummary
-                    expandIcon={<ExpandMoreIcon />}
-                    aria-controls="panel1a-content"
-                    id="panel1a-header"
-                >
-                    <Typography variant="h3">{course.name}</Typography>
-                </AccordionSummary>
-                <AccordionDetails>
-                    <Typography>{course.description}</Typography>
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={() => {
-                            navigate(`/course/${course.id}`);
-                        }}
+        if (loading === LoadingStatus.Loaded) {
+            return Object(entities).values.map((course: CourseEntity) => (
+                <Accordion key={course.id}>
+                    <AccordionSummary
+                        expandIcon={<ExpandMoreIcon />}
+                        aria-controls="panel1a-content"
+                        id="panel1a-header"
                     >
-                        <DoorBack />
-                        Go
-                    </Button>
-                    <Button>
-
-                    </Button>
-                </AccordionDetails>
-            </Accordion>
-        ));
+                        <Typography variant="h3">{course.name}</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                        <Typography>{course.description}</Typography>
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={() => {
+                                navigate(`/course/${course.id}`);
+                            }}
+                        >
+                            <DoorBack />
+                            Go
+                        </Button>
+                        <Button>
+    
+                        </Button>
+                    </AccordionDetails>
+                </Accordion>
+            ));
+        }
     };
 
     return <Layout>{renderContent()}</Layout>;

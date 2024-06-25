@@ -7,9 +7,13 @@ from fastapi.routing import APIRouter
 from app.core.const import *
 from app.core.utils.model_check import model_check_by_uuid
 from app.core.utils.image_check import to_frontend
-from app.core.database.models.user import UserTable 
 
-from app.site.backend.src.utils.const import NoneResultedResponse, PasswordedRequest, BaseResponse, OneResultedResponse
+from app.core.database.models.user import UserTable 
+from app.core.database.models.courses import CourseTable 
+from app.core.database.models.memberships import MembershipTable 
+
+from app.site.backend.src.utils.const import NoneResultedResponse, PasswordedRequest, BaseResponse, OneResultedResponse,FilterQuerys
+from app.site.backend.src.utils.filter_the_groups import filter_the_groups
 
 
 single_router = APIRouter(
@@ -66,7 +70,16 @@ async def check_single_profile_password(
 @single_router.get("/courses", response_model=BaseResponse, tags=["courses"])
 async def single_profile_courses(
     request: Request, instance_id: Annotated[str, Path(...)],
-    db: AsyncSession = Depends(db.get_session)
+    filters: FilterQuerys = Depends(), db: AsyncSession = Depends(db.get_session)
 ):
-    
-    return JSONResponse()
+    instance: UserTable = await model_check_by_uuid(instance_id, db, UserTable)
+    query = await filter_the_groups(db, filters, instance.id)
+    membership_ids = {membership.course_id for membership in (await db.execute(
+        select(MembershipTable).where(MembershipTable.user_id == instance.id)
+    )).scalars().all()}
+
+    courses = [course.to_reducer_dict() for course in (await db.execute(
+        query.where(CourseTable.id.in_(membership_ids))
+    )).scalars().all()]
+
+    return JSONResponse(BaseResponse(subdata=courses).model_dump(), 200)

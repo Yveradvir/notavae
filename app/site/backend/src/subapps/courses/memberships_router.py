@@ -11,7 +11,7 @@ from app.core.database.models.courses import CourseTable
 from app.core.database.models.memberships import MembershipTable
 
 from app.core.utils.model_check import model_check_by_uuid
-from app.core.utils.membership_actions import is_user_in
+from app.core.utils.membership_actions import is_user_in, does_user_cross_memberships_limit
 
 from app.site.backend.src.utils.const import OneResultedResponse, PasswordedRequest, BaseResponse, TodoModel
 from app.site.backend.src.subapps.courses.models import CoursesCourseNewModel
@@ -31,6 +31,9 @@ async def single_course__memberships__join(
 ):
     instance: CourseTable = await model_check_by_uuid(instance_id, db, CourseTable)
     me: UserTable = await model_check_by_uuid(request.state.token["data"]["id"], db, UserTable)
+    
+    await does_user_cross_memberships_limit(db, me.id)
+
     membership: MembershipTable = await is_user_in(db, me.id, instance.id)
 
     if not membership:

@@ -6,8 +6,19 @@ import NewCourseForm from "./subapps/courses/new_course.sbap";
 import ErrorPage from "@modules/components/error_page";
 import ErrorFormatPage from "./subapps/error_format_page";
 import MyCoursesPage from "./subapps/myfind_courses/my_courses.sbap";
+import cookies from "@modules/utils/cookies";
+import { useAppDispatch } from "@modules/reducers";
+import { loadMyProfile } from "@modules/reducers/slices/profile/thunks/load_my_profile.thunk";
+import { loadMyProfileImage } from "@modules/reducers/slices/profile/thunks/load_my_pfp.thunk";
 
 const App: React.FC = () => {
+    const dispatch = useAppDispatch();
+    
+    if (cookies.get("refresh_csrf")) {
+        dispatch(loadMyProfile());
+        dispatch(loadMyProfileImage());
+    }
+    
     return (
         <BrowserRouter>
             <Routes>

@@ -1,6 +1,6 @@
 from app.site.backend.src.utils.models import *
 
-from typing import Any, Union, Annotated
+from typing import Any, Union, Optional
 from fastapi import Query
 
 class FilterQuerys(BaseModel):
@@ -8,9 +8,12 @@ class FilterQuerys(BaseModel):
     For routes that require a filter params in query
     """
 
-    name: Annotated[str, Query(None)]
-    newest: Annotated[bool, Query(True)]
-    am_i_author: Annotated[bool, Query(False)]
+    name: Optional[str] = Query(None)
+    newest: bool = Query(True)
+    am_i_author: int = Query(1)
+        # 0 - I am author
+        # 1 - All groups
+        # 2 - I am NOT author
 
 class PasswordedRequest(BaseModel):
     """

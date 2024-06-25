@@ -43,13 +43,14 @@ class JwtSecurity:
         return datetime.now(tz=timezone.utc).timestamp()
 
     def get_payload(
-        self, data: Dict 
+        self, data: Dict, ttype: TokenType
     ) -> SecurityPayloadReturn:
         """
         Create a payload for tokens
 
         Parameters:
             data (Dict[str, Any]): Data to be encoded into the token
+            ttype (TokenType): The type of the token
 
         Return:
             SecurityPayloadReturn: A named tuple with Payload typed dict first and csrf token
@@ -60,7 +61,11 @@ class JwtSecurity:
 
         return SecurityPayloadReturn({
             "iat": posix,
-            "exp": posix + self.config.access_token_life,
+            "exp": posix + (
+                self.config.access_token_life
+                if ttype == "access" else 
+                self.config.refresh_token_life
+            ),
             "trg": posix + self.config.access_token_triger,
             "csrf": csrf,
             "data": data
@@ -79,7 +84,7 @@ class JwtSecurity:
             SecurityTokenReturn: A named tuple with jwt token first and csrf token second
         """
 
-        payload, csrf = self.get_payload(data)
+        payload, csrf = self.get_payload(data, "refresh")
         token = self.jwt.encode(
             payload=payload, key=self.config.secret_key, 
             algorithm=self.config.algorithm,
@@ -105,7 +110,7 @@ class JwtSecurity:
             SecurityTokenReturn: A named tuple with jwt token first and csrf token second.
         """
 
-        payload, csrf = self.get_payload(data)
+        payload, csrf = self.get_payload(data, "refresh")
         payload.pop("trg")
         
         token = self.jwt.encode(
@@ -228,7 +233,7 @@ class JwtSecurity:
                 trg = token.get("trg", None)
                 if trg:
                     if (self._g_posix() - token["iat"]) > self.config.access_token_triger:
-                        self.set_cookies(Response(), token["data"], "access")
+                        self.set_cookies(Response(), self.create_access_token(token["data"]), "access")
                 
                 request.state.token = token
             else:

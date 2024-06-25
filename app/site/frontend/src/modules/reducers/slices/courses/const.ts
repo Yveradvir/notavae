@@ -10,11 +10,11 @@ export interface CourseEntity extends TableMixin {
 export interface FiltersEntity {
     name: string | null;
     newest: boolean;
-    am_i_author: boolean;
+    am_i_author: number;
 }
 
 export const defaultFilters: FiltersEntity = {
     name: null,
     newest: true,
-    am_i_author: false
+    am_i_author: 1
 }
