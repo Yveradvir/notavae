@@ -2,11 +2,13 @@ import { configureStore } from "@reduxjs/toolkit";
 import { useDispatch, useSelector } from "react-redux";
 import { PROFILE_FEATURE_KEY, profileReducer } from "./slices/profile";
 import { MY_COURSES_FEATURE_KEY, myCoursesReducer } from "./slices/courses/my_courses";
+import { FIND_COURSES_FEATURE_KEY, findCoursesReducer } from "./slices/courses/find_courses";
 
 export const store = configureStore({
     reducer: {
         [PROFILE_FEATURE_KEY]: profileReducer,
-        [MY_COURSES_FEATURE_KEY]: myCoursesReducer
+        [MY_COURSES_FEATURE_KEY]: myCoursesReducer,
+        [FIND_COURSES_FEATURE_KEY]: findCoursesReducer
     },
     middleware: (getDefaultMiddleware) => getDefaultMiddleware(),
     devTools: import.meta.env.DEV

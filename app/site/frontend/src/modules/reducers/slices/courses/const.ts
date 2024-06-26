@@ -5,6 +5,7 @@ export interface CourseEntity extends TableMixin {
     image: string | null;
     description: string;
     author_id: string;
+    is_private: boolean;
 }
 
 export interface FiltersEntity {

@@ -1,4 +1,4 @@
-from fastapi import Request, Depends, HTTPException
+from fastapi import Request, Depends, HTTPException, Query
 
 from fastapi.responses import JSONResponse
 from fastapi.routing import APIRouter
@@ -13,8 +13,9 @@ from app.core.database.models.user import UserTable
 from app.core.database.models.courses import CourseTable, AssociatedTable
 from app.core.database.models.memberships import MembershipTable
 
-from app.site.backend.src.utils.const import OneResultedResponse, PasswordedRequest
-from app.site.backend.src.subapps.courses.models import CoursesCourseNewModel
+from app.site.backend.src.utils.const import OneResultedResponse, PasswordedRequest, FilterQuerys
+from app.site.backend.src.utils.filter_the_groups import filter_the_groups
+from app.site.backend.src.subapps.courses.models import CoursesCourseNewModel, BaseResponse
 
 from app.site.backend.src.subapps.courses.single_router import single_router
 
@@ -65,3 +66,23 @@ async def courses_new(
         return JSONResponse(OneResultedResponse(subdata=str(new_course.id)).model_dump(), 201)
     else: 
         raise HTTPException(409, "Course arleady exist.")
+
+
+@router.get("/find", response_model=BaseResponse)
+async def courses_find(
+    request: Request, filters: FilterQuerys = Depends(),
+    page: int = Query(1), user_id: str | None = Query(None),
+    db: AsyncSession = Depends(db.get_session)
+):
+    print(filters.model_dump())
+    offset = (page - 1) * settings.pagination_unit
+    if user_id:
+        await model_check_by_uuid(user_id, db, UserTable)
+    
+    courses = [course.to_reducer_dict() for course in (await db.execute(
+        (await filter_the_groups(db, filters, user_id))
+            .offset(offset)
+            .limit(settings.pagination_unit)
+    )).scalars().all()]
+
+    return JSONResponse(BaseResponse(subdata=courses).model_dump(), 200)

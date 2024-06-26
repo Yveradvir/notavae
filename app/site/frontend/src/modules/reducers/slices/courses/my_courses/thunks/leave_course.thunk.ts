@@ -9,7 +9,7 @@ export const leaveCourse = createAsyncThunk<EntityId, string>(
     "my_courses/leave",
     async (course_id, thunkAPI) => {
         try {
-            const response = await LaunchedAxios.get(`/c/${course_id}/m/leave`);
+            const response = await LaunchedAxios.delete(`/c/${course_id}/m/leave`);
 
             if (response.status === 200) {
                 return response.data.subdata;

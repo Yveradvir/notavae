@@ -6,11 +6,23 @@ import { RejectedError } from "@modules/constants/rejector.const";
 import { CourseEntity } from "../../const";
 import { findCoursesAdapter, FindCoursesState } from "../const";
 
-export const loadFindCourses = createAsyncThunk<CourseEntity[]>(
-    "my_courses/load",
-    async (_, thunkAPI) => {
+export const loadFindCourses = createAsyncThunk<CourseEntity[], number>(
+    "find_courses/load",
+    async (page, thunkAPI) => {
         try {
-            const response = await LaunchedAxios.get("/c/my");
+            const state = thunkAPI.getState() as {
+                profile: { instances: { profileEntity: { id: string } } };
+                my_courses: { filters: object };
+            };
+            console.log(state);
+            
+            const response = await LaunchedAxios.get(`/c/find`, {
+                params: {
+                    page,
+                    user_id: state.profile.instances.profileEntity.id,
+                    ...state.my_courses.filters,
+                },
+            });
 
             if (response.status === 200) {
                 return response.data.subdata;
@@ -33,7 +45,12 @@ export const loadFindCourses__Fulfilled = (
     state: FindCoursesState,
     action: PayloadAction<CourseEntity[]>
 ) => {
-    findCoursesAdapter.addMany(state, action.payload);
+    state.hasMore = true;
+
+    if (action.payload.length) {
+        findCoursesAdapter.addMany(state, action.payload);
+    } else state.hasMore = false;
+
     state.loading = LoadingStatus.Loaded;
     state.error = null;
 };

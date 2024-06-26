@@ -23,6 +23,12 @@ class CourseTable(Base, InitialMixin):
         uselist=True, cascade="all, delete-orphan"
     )
 
+    def to_reducer_dict(self):
+        data = self.to_dict()
+        data["is_private"] = bool(data.pop("password", None))
+
+        return data
+
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
 

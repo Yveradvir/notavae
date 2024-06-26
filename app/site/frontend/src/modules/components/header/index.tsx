@@ -13,8 +13,8 @@ import { useAppSelector } from "@modules/reducers";
 import { useCallback } from "react";
 
 const Header = () => {
-    const { my_courses, profile } = useAppSelector(state => state)
-    const getData = useCallback(() => {console.log(my_courses, profile)}, [my_courses, profile])
+    const state = useAppSelector(state => state)
+    const getData = useCallback(() => {console.log(state)}, [state])
 
     return (
         <AppBar

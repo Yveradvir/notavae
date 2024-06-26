@@ -10,6 +10,7 @@ import cookies from "@modules/utils/cookies";
 import { useAppDispatch } from "@modules/reducers";
 import { loadMyProfile } from "@modules/reducers/slices/profile/thunks/load_my_profile.thunk";
 import { loadMyProfileImage } from "@modules/reducers/slices/profile/thunks/load_my_pfp.thunk";
+import FindCoursesPage from "./subapps/myfind_courses/find_courses.sbap";
 
 const App: React.FC = () => {
     const dispatch = useAppDispatch();
@@ -26,7 +27,7 @@ const App: React.FC = () => {
                 <Route path="/a/signup/" element={<SignUpForm />} />
                 <Route path="/a/signin/" element={<SignInForm />} />
                 <Route path="/c/new" element={<NewCourseForm />} />
-                <Route path="/c/find" element={<SignInForm />} />
+                <Route path="/c/find" element={<FindCoursesPage />} />
                 <Route path="/c/my" element={<MyCoursesPage />} />
                 <Route path="/c/:course_id" element={<SignInForm />} />
                 

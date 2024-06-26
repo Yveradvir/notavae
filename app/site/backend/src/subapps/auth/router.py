@@ -23,7 +23,12 @@ async def a_signup(
     db: AsyncSession = Depends(db.get_session)
 ):
     user_query = await db.execute(
-        select(UserTable).where((UserTable.username == body.username) | (UserTable.email == body.email)).options(selectinload(UserTable.badtokens))
+        select(UserTable)
+            .where(
+                (UserTable.username == body.username) 
+                |     (UserTable.email == body.email)
+            )
+            .options(selectinload(UserTable.badtokens))
     )
     user = user_query.scalar_one_or_none()
 

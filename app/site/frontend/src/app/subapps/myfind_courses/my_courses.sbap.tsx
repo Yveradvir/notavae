@@ -15,26 +15,22 @@ import {
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { DoorBack } from "@mui/icons-material";
-import { CourseEntity } from "@modules/reducers/slices/courses/const";
+import { EntityId } from "@reduxjs/toolkit";
 
 const MyCoursesPage = () => {
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
+    const { loadings } = useAppSelector(state => state.profile)
     const { entities, error, loading, ids } = useAppSelector(
         (state) => state.my_courses
     );
 
     useEffect(() => {
-        console.log(entities, error);
-        
         const fetchCourses = async () => {
-            if (
-                !entities.length &&
-                !error &&
-                loading === LoadingStatus.ANotLoaded
-            ) {
+            if (loadings.profileEntity === LoadingStatus.Loaded) {
                 await dispatch(loadMyCourses());
             }
+            
             if (error) {
                 navigate(
                     `/error/${(error as RejectedError).status_code}/${
@@ -44,60 +40,62 @@ const MyCoursesPage = () => {
             }
         };
         fetchCourses();
-    }, [entities, error, loading, dispatch, navigate]);
+    }, [dispatch, error, navigate, loadings]);
 
     const renderContent = () => {
         if (loading === LoadingStatus.Loading) {
             return <CircularProgress />;
         }
 
-        if (loading === LoadingStatus.Loaded && !ids.length) {
-            return (
-                <div>
-                    <Typography variant="h6">
-                        You don't have any courses yet, please search for
-                        courses.
-                    </Typography>
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={() => navigate("/c/find")}
-                    >
-                        Search Courses
-                    </Button>
-                </div>
-            );
-        }
-
         if (loading === LoadingStatus.Loaded) {
-            return Object(entities).values.map((course: CourseEntity) => (
-                <Accordion key={course.id}>
-                    <AccordionSummary
-                        expandIcon={<ExpandMoreIcon />}
-                        aria-controls="panel1a-content"
-                        id="panel1a-header"
-                    >
-                        <Typography variant="h3">{course.name}</Typography>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                        <Typography>{course.description}</Typography>
+            if (!ids.length) {
+                return (
+                    <div>
+                        <Typography variant="h6">
+                            You don't have any courses yet, please search for
+                            courses.
+                        </Typography>
                         <Button
                             variant="contained"
                             color="primary"
-                            onClick={() => {
-                                navigate(`/course/${course.id}`);
-                            }}
+                            onClick={() => navigate("/c/find")}
                         >
-                            <DoorBack />
-                            Go
+                            Search Courses
                         </Button>
-                        <Button>
-    
-                        </Button>
-                    </AccordionDetails>
-                </Accordion>
-            ));
+                    </div>
+                );
+            }
+
+            if (entities) {
+                return ids.map((id: EntityId) => (
+                    <Accordion key={entities[id].id}>
+                        <AccordionSummary
+                            expandIcon={<ExpandMoreIcon />}
+                            aria-controls="panel1a-content"
+                            id="panel1a-header"
+                        >
+                            <Typography variant="h3">{entities[id].name}</Typography>
+                        </AccordionSummary>
+                        <AccordionDetails>
+                            <Typography>{entities[id].description}</Typography>
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                onClick={() => {
+                                    navigate(`/c/${entities[id].id}`);
+                                }}
+                            >
+                                <DoorBack />
+                                Go
+                            </Button>
+                        </AccordionDetails>
+                    </Accordion>
+                ));
+            
+            }
         }
+
+        return null;
     };
 
     return <Layout>{renderContent()}</Layout>;

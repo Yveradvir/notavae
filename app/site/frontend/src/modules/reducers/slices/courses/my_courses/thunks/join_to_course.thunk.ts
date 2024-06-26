@@ -1,15 +1,16 @@
 import { LaunchedAxios } from "@modules/api";
 import { Rejector } from "@modules/reducers/rejector";
 import { createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
-import { MyCourseEntity, myCoursesAdapter, MyCoursesState } from "../const";
+import { myCoursesAdapter, MyCoursesState } from "../const";
 import { LoadingStatus } from "@modules/constants/reducers.conts";
 import { RejectedError } from "@modules/constants/rejector.const";
+import { CourseEntity } from "../../const";
 
-export const joinToCourse = createAsyncThunk<MyCourseEntity, string>(
+export const joinToCourse = createAsyncThunk<CourseEntity, string>(
     "my_courses/join",
     async (course_id, thunkAPI) => {
         try {
-            const response = await LaunchedAxios.get(`/c/${course_id}/m/join`);
+            const response = await LaunchedAxios.post(`/c/${course_id}/m/join`);
 
             if (response.status === 201) {
                 return response.data.subdata;
@@ -30,7 +31,7 @@ export const joinToCourse__Pending = (state: MyCoursesState) => {
 
 export const joinToCourse__Fulfilled = (
     state: MyCoursesState,
-    action: PayloadAction<MyCourseEntity>
+    action: PayloadAction<CourseEntity>
 ) => {
     myCoursesAdapter.addOne(state, action.payload);
 

@@ -8,6 +8,7 @@ export interface FindCoursesState extends EntityState<CourseEntity, EntityId> {
     loading: LoadingStatus;
     error: RejectedError | null;
     filters: FiltersEntity;
+    hasMore: boolean;
 }
 
 export const findCoursesAdapter = createEntityAdapter<CourseEntity>();
@@ -15,5 +16,6 @@ export const findCoursesInitialState = findCoursesAdapter.getInitialState({
     ids: [],
     loading: LoadingStatus.ANotLoaded,
     error: null,
-    filters: defaultFilters
+    filters: defaultFilters,
+    hasMore: true
 });
