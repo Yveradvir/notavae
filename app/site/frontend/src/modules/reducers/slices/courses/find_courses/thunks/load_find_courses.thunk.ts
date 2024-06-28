@@ -3,7 +3,7 @@ import { Rejector } from "@modules/reducers/rejector";
 import { createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { LoadingStatus } from "@modules/constants/reducers.conts";
 import { RejectedError } from "@modules/constants/rejector.const";
-import { CourseEntity } from "../../const";
+import { CourseEntity, FiltersEntity } from "../../const";
 import { findCoursesAdapter, FindCoursesState } from "../const";
 
 export const loadFindCourses = createAsyncThunk<CourseEntity[], number>(
@@ -12,15 +12,16 @@ export const loadFindCourses = createAsyncThunk<CourseEntity[], number>(
         try {
             const state = thunkAPI.getState() as {
                 profile: { instances: { profileEntity: { id: string } } };
-                my_courses: { filters: object };
+                find_courses: { filters: FiltersEntity };
             };
-            console.log(state);
-            
+
+            console.log("loadFindCourses", state);
+
             const response = await LaunchedAxios.get(`/c/find`, {
                 params: {
                     page,
                     user_id: state.profile.instances.profileEntity.id,
-                    ...state.my_courses.filters,
+                    ...state.find_courses.filters,
                 },
             });
 
@@ -57,7 +58,7 @@ export const loadFindCourses__Fulfilled = (
 
 export const loadFindCourses__Rejected = (
     state: FindCoursesState,
-    action: { payload: unknown } // vscode gave me an error without it.
+    action: { payload: unknown }
 ) => {
     state.error = action.payload as RejectedError;
     state.loading = LoadingStatus.Error;

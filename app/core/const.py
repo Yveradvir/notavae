@@ -26,5 +26,6 @@ jwtsecure = JwtSecurity(
 )
 settings = CoreSettings(
     max_memberships_per_user=15,
+    max_memberships_per_course=30,
     pagination_unit=5
 )

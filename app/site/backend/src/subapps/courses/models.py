@@ -7,3 +7,6 @@ class CoursesCourseNewModel(BaseModel):
     description: str
 
     image: str | None
+
+class CoursesMembershipStatusChange(BaseModel):
+    status: str

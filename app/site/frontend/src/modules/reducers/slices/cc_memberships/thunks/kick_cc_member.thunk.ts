@@ -1,15 +1,20 @@
 import { LaunchedAxios } from "@modules/api";
 import { Rejector } from "@modules/reducers/rejector";
 import { createAsyncThunk, EntityId, PayloadAction } from "@reduxjs/toolkit";
-import { myCoursesAdapter, MyCoursesState } from "../const";
 import { LoadingStatus } from "@modules/constants/reducers.conts";
 import { RejectedError } from "@modules/constants/rejector.const";
+import { ccMembershipsAdapter, ccMembershipsState } from "../const";
 
-export const leaveCourse = createAsyncThunk<EntityId, EntityId>(
-    "my_courses/leave",
-    async (course_id, thunkAPI) => {
+interface kickCcMemberI {
+    course_id: EntityId;
+    kicked_id: EntityId;
+}
+
+export const kickCcMember = createAsyncThunk<EntityId, kickCcMemberI>(
+    "current_course_memberships/kick",
+    async ({course_id, kicked_id}, thunkAPI) => {
         try {
-            const response = await LaunchedAxios.delete(`/c/${course_id}/m/leave`);
+            const response = await LaunchedAxios.delete(`/c/single/${course_id}/m/kick/${kicked_id}`);
 
             if (response.status === 200) {
                 return response.data.subdata;
@@ -24,23 +29,22 @@ export const leaveCourse = createAsyncThunk<EntityId, EntityId>(
     }
 );
 
-export const leaveCourse__Pending = (state: MyCoursesState) => {
+export const kickCcMember__Pending = (state: ccMembershipsState) => {
     state.loading = LoadingStatus.Loading;
 };
 
-export const leaveCourse__Fulfilled = (
-    state: MyCoursesState,
+export const kickCcMember__Fulfilled = (
+    state: ccMembershipsState,
     action: PayloadAction<EntityId>
 ) => {
-    myCoursesAdapter.removeOne(state, action.payload);
-
+    ccMembershipsAdapter.removeOne(state, action.payload);
     state.loading = LoadingStatus.Loaded;
     state.error = null;
 };
 
-export const leaveCourse__Rejected = (
-    state: MyCoursesState,
-    action: { payload: unknown } // vscode gave me an error without it.
+export const kickCcMember__Rejected = (
+    state: ccMembershipsState,
+    action: { payload: unknown }
 ) => {
     state.error = action.payload as RejectedError;
     state.loading = LoadingStatus.Error;

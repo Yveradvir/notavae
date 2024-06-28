@@ -21,6 +21,19 @@ async def is_user_in(
     
     return instance
 
+async def does_course_cross_memberships_limit(
+    db: AsyncSession, course_id: str
+):
+    """Function to check does course cross the limit of memberships"""
+    query = (await db.execute(
+            select(MembershipTable)
+                .where(MembershipTable.course_id == course_id)
+    )).scalars().all()
+    
+    if len(query) >= settings.max_memberships_per_course:
+        raise HTTPException(409, f"Max members in one course: {settings.max_memberships_per_course}")
+
+
 async def does_user_cross_memberships_limit(
     db: AsyncSession, user_id: str
 ) -> bool:
@@ -31,4 +44,4 @@ async def does_user_cross_memberships_limit(
     )).scalars().all()
 
     if len(query) >= settings.max_memberships_per_user:
-        raise HTTPException(409, f"You cannot be a member more than {settings.max_memberships_per_user} groups (Including your own)")
+        raise HTTPException(409, f"You cannot be a member more than {settings.max_memberships_per_user} courses (Including your own)")

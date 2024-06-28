@@ -1,13 +1,12 @@
 from app.site.backend.src.utils.models import *
 
-from typing import Any, Union, Optional
-from fastapi import Query
+from typing import Any, Union, Optional, Annotated
+from fastapi import Query, Depends
 
 class FilterQuerys(BaseModel):
     """
-    For routes that require a filter params in query
+    For routes that require filter params in query
     """
-
     name: Optional[str] = Query(None)
     newest: bool = Query(True)
     am_i_author: int = Query(1)

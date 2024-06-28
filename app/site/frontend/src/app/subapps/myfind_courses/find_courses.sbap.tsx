@@ -5,21 +5,16 @@ import { useAppDispatch, useAppSelector } from "@modules/reducers";
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-    Accordion,
-    AccordionSummary,
-    AccordionDetails,
-    Button,
     CircularProgress,
     Typography,
     Box,
 } from "@mui/material";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { DoorBack } from "@mui/icons-material";
 import { EntityId } from "@reduxjs/toolkit";
 import { loadFindCourses } from "@modules/reducers/slices/courses/find_courses/thunks/load_find_courses.thunk";
 import InfiniteScroll from "react-infinite-scroll-component";
 import FilterButton from "@modules/components/filter";
 import { findCoursesActions } from "@modules/reducers/slices/courses/find_courses";
+import CourseAccordion from "./components/course_accordion";
 
 const FindCoursesPage = () => {
     const navigate = useNavigate();
@@ -88,30 +83,7 @@ const FindCoursesPage = () => {
                 }
             >
                 {ids.map((id: EntityId) => (
-                    <Accordion key={entities[id].id}>
-                        <AccordionSummary
-                            expandIcon={<ExpandMoreIcon />}
-                            aria-controls="panel1a-content"
-                            id="panel1a-header"
-                        >
-                            <Typography variant="h3">
-                                {entities[id].name}
-                            </Typography>
-                        </AccordionSummary>
-                        <AccordionDetails>
-                            <Typography>{entities[id].description}</Typography>
-                            <Button
-                                variant="contained"
-                                color="primary"
-                                onClick={() => {
-                                    navigate(`/c/${entities[id].id}`);
-                                }}
-                            >
-                                <DoorBack />
-                                Go
-                            </Button>
-                        </AccordionDetails>
-                    </Accordion>
+                    <CourseAccordion course={entities[id]}/>
                 ))}
             </InfiniteScroll>
         );
