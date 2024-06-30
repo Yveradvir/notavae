@@ -1,20 +1,23 @@
 import { LaunchedAxios } from "@modules/api";
 import { Rejector } from "@modules/reducers/rejector";
 import { createAsyncThunk, EntityId, PayloadAction } from "@reduxjs/toolkit";
-import { myCoursesAdapter, MyCoursesState } from "../const";
 import { LoadingStatus } from "@modules/constants/reducers.conts";
 import { RejectedError } from "@modules/constants/rejector.const";
-import { ccMembershipsActions } from "@modules/reducers/slices/cc_memberships";
+import { ccAssociationsAdapter, ccAssociationsState } from "../const";
 
-export const leaveCourse = createAsyncThunk<EntityId, EntityId>(
-    "my_courses/leave",
-    async (course_id, thunkAPI) => {
+interface deleteCcAssociationI {
+    associator_id: EntityId;
+    associated_id: EntityId;
+}
+
+export const deleteCcAssociation = createAsyncThunk<EntityId, deleteCcAssociationI>(
+    "current_course_memberships/kick",
+    async ({associated_id, associator_id}, thunkAPI) => {
         try {
-            const response = await LaunchedAxios.delete(`/c/single/${course_id}/m/leave`);
-            
+            const response = await LaunchedAxios.delete(`/c/single/${associator_id}/asso/${associated_id}`);
+
             if (response.status === 200) {
-                thunkAPI.dispatch(ccMembershipsActions.deleteMembership(response.data.subdata));
-                return course_id;
+                return response.data.subdata;
             } else {
                 return thunkAPI.rejectWithValue(Rejector.standartReject());
             }
@@ -26,23 +29,22 @@ export const leaveCourse = createAsyncThunk<EntityId, EntityId>(
     }
 );
 
-export const leaveCourse__Pending = (state: MyCoursesState) => {
+export const deleteCcAssociation__Pending = (state: ccAssociationsState) => {
     state.loading = LoadingStatus.Loading;
 };
 
-export const leaveCourse__Fulfilled = (
-    state: MyCoursesState,
+export const deleteCcAssociation__Fulfilled = (
+    state: ccAssociationsState,
     action: PayloadAction<EntityId>
 ) => {
-    myCoursesAdapter.removeOne(state, action.payload);
-
+    ccAssociationsAdapter.removeOne(state, action.payload);
     state.loading = LoadingStatus.Loaded;
     state.error = null;
 };
 
-export const leaveCourse__Rejected = (
-    state: MyCoursesState,
-    action: { payload: unknown } // vscode gave me an error without it.
+export const deleteCcAssociation__Rejected = (
+    state: ccAssociationsState,
+    action: { payload: unknown }
 ) => {
     state.error = action.payload as RejectedError;
     state.loading = LoadingStatus.Error;

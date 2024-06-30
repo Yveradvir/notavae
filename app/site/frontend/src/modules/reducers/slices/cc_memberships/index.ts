@@ -1,5 +1,5 @@
-import { createSlice } from "@reduxjs/toolkit";
-import { ccMembershipsInitialState } from "./const";
+import { createSlice, EntityId, PayloadAction } from "@reduxjs/toolkit";
+import { ccMembershipsAdapter, ccMembershipsInitialState, ccMembershipsState } from "./const";
 import {
     loadCcMemberships,
     loadCcMemberships__Fulfilled,
@@ -19,6 +19,7 @@ import {
     kickCcMember__Pending,
     kickCcMember__Rejected,
 } from "./thunks/kick_cc_member.thunk";
+import { LoadingStatus } from "@modules/constants/reducers.conts";
 
 export const CC_MEMBERSHIPS_FEATURE_KEY = "current_course_memberships";
 
@@ -27,6 +28,17 @@ const ccMembershipsSlice = createSlice({
     initialState: ccMembershipsInitialState,
     reducers: {
         reset: () => ccMembershipsInitialState,
+        deleteMembership: (
+            state: ccMembershipsState,
+            action: PayloadAction<EntityId>
+        ) => {
+            console.log("deleteMembership");
+            
+            ccMembershipsAdapter.removeOne(state, action.payload)
+            
+            state.loading = LoadingStatus.Loaded;
+            state.error = null;        
+        },
     },
     extraReducers: (builder) => {
         builder

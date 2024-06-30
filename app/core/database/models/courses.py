@@ -10,7 +10,8 @@ class CourseTable(Base, InitialMixin):
     password = Column(String, nullable=True)
     image = Column(LargeBinary, nullable=True)
     author_id = Column(Uuid(as_uuid=True), ForeignKey('users.id'))
-    
+    current_topic = Column(Text, nullable=True)
+
     author = relationship("UserTable")
     memberships = relationship(
         "MembershipTable", primaryjoin="CourseTable.id == MembershipTable.course_id", 
@@ -44,3 +45,10 @@ class AssociatedTable(Base, InitialMixin):
 
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
+
+    def to_reducer_dict(self):
+        data = self.to_dict([])
+
+        data['associated_name'] = self.associated.name
+
+        return data

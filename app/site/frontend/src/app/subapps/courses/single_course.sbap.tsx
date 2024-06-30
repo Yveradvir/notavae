@@ -1,12 +1,14 @@
 import React, { useCallback, useEffect, useState } from "react";
 import Layout from "@modules/components/layout";
-import { useAppSelector } from "@modules/reducers";
+import { useAppDispatch, useAppSelector } from "@modules/reducers";
 import { CourseEntity } from "@modules/reducers/slices/courses/const";
 import { EntityId } from "@reduxjs/toolkit";
 import { useParams, useNavigate } from "react-router-dom";
 import { LaunchedAxios } from "@modules/api";
 import PasswordForm from "./components/password_form";
 import CourseRender from "./components/course_render";
+import { LoadingStatus } from "@modules/constants/reducers.conts";
+import { loadMyCourses } from "@modules/reducers/slices/courses/my_courses/thunks/load_my_courses.thunk";
 
 const NotCourseRender: React.FC<{ course: CourseEntity | null; loadingCourse: boolean; error: string | null}> = ({ course, loadingCourse, error }) => {
     const navigate = useNavigate();
@@ -34,8 +36,9 @@ const NotCourseRender: React.FC<{ course: CourseEntity | null; loadingCourse: bo
 };
 
 const SingleCourse: React.FC = () => {
+    const dispatch = useAppDispatch();
     const { course_id } = useParams<{ course_id: string }>();
-    const { ids, entities } = useAppSelector(state => state.my_courses);
+    const { ids, entities, loading } = useAppSelector(state => state.my_courses);
     const [course, setCourse] = useState<CourseEntity | null>(null);
     const [loadingCourse, setLoadingCourse] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
@@ -52,13 +55,20 @@ const SingleCourse: React.FC = () => {
     }, [course_id]);
 
     useEffect(() => {
+        if (loading === LoadingStatus.ANotLoaded) {
+            console.log("SingleCourse > if (loading === LoadingStatus.ANotLoaded) ");
+            
+            (async () => {
+                await dispatch(loadMyCourses());
+            })()
+        }
         if (!ids.includes(course_id as EntityId)) {
             loadOneCourse();
         } else {
             setCourse(entities[course_id as EntityId] as CourseEntity);
             setLoadingCourse(false);
         }
-    }, [course_id, ids, loadOneCourse, entities]);
+    }, [course_id, ids, loadOneCourse, loading, entities, dispatch]);
 
     return (
         <Layout>

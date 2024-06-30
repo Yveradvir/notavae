@@ -82,10 +82,13 @@ async def single_course__memberships__leave(
     me: UserTable = await model_check_by_uuid(request.state.token["data"]["id"], db, UserTable)
     membership: MembershipTable = await is_user_in(db, me.id, instance.id)
 
+    if me.id == instance.author_id:
+        raise HTTPException(403, "You can't leave course since you're admin")
+
     if membership:
         _id = str(membership.id)
-        db.delete(membership)
         
+        await db.delete(membership)
         await db.commit()
 
         return JSONResponse(
@@ -93,22 +96,22 @@ async def single_course__memberships__leave(
                 subdata=_id,
                 todo=TodoModel(
                     my_courses_update=True
-                ).model_dump()
-            ), 201
+                )
+            ).model_dump(), 200
         )
     else:
         raise HTTPException(404, "You aren't a member of this group")
 
 
 @membership_router.delete(path="/kick/{user_id}", response_model=OneResultedResponse, dependencies=[Depends(jwtsecure.depend_access_token)])
-async def single_course__memberships__leave(
+async def single_course__memberships__kick(
     instance_id: Annotated[str, Path(...)], user_id: Annotated[str, Path(...)],
     request: Request, db: AsyncSession = Depends(db.get_session)
 ):
     my_id = request.state.token["data"]["id"]
 
     if my_id == user_id:
-        raise HTTPException(409, "You can't kick yourself, leave instead")
+        raise HTTPException(403, "You can't kick yourself, delete group instead")
 
     instance: CourseTable = await model_check_by_uuid(instance_id, db, CourseTable)
     
@@ -120,11 +123,12 @@ async def single_course__memberships__leave(
 
 
     if my_membership and user_membership:
-        if my_membership.is_admin == False:
+        print(my_membership.is_admin)
+        if not my_membership.is_admin:
             raise HTTPException(403, "You aren't an admin of this group")
-        _id = user_membership.id
+        _id = str(user_membership.id)
 
-        db.delete(user_membership)
+        await db.delete(user_membership)
         await db.commit()
 
         return JSONResponse(
@@ -143,7 +147,7 @@ async def single_course__memberships__leave(
 
 
 @membership_router.patch(path="/status", response_model=BaseResponse, dependencies=[Depends(jwtsecure.depend_access_token)])
-async def single_course__memberships__leave(
+async def single_course__memberships__status(
     request: Request, body: CoursesMembershipStatusChange,
     instance_id: Annotated[str, Path(...)],
     db: AsyncSession = Depends(db.get_session)
@@ -164,7 +168,7 @@ async def single_course__memberships__leave(
 
 
 @membership_router.patch(path="/active", response_model=BaseResponse, dependencies=[Depends(jwtsecure.depend_access_token)])
-async def single_course__memberships__leave(
+async def single_course__memberships__active(
     request: Request, instance_id: Annotated[str, Path(...)],
     db: AsyncSession = Depends(db.get_session)
 ):

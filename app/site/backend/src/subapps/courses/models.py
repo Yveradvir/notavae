@@ -8,5 +8,9 @@ class CoursesCourseNewModel(BaseModel):
 
     image: str | None
 
+class CoursesPreDeleteModel(BaseModel):
+    user_password: str
+    course_password: str
+
 class CoursesMembershipStatusChange(BaseModel):
     status: str

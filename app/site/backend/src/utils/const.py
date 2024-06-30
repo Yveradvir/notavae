@@ -19,7 +19,7 @@ class PasswordedRequest(BaseModel):
     For routes that require a password to continue.
     """
     
-    password: str
+    password: Union[str, None]
 
 class NoneResultedResponse(BaseModel):
     """

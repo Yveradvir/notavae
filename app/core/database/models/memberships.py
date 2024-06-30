@@ -1,6 +1,7 @@
 from sqlalchemy import Column, ForeignKey, Boolean, Uuid, String
 from sqlalchemy.orm import relationship
 from app.core.database.database_constant import Base, InitialMixin
+from app.core.utils.image_check import to_frontend
 
 class MembershipTable(Base, InitialMixin):
     __tablename__ = 'memberships'
@@ -24,3 +25,10 @@ class MembershipTable(Base, InitialMixin):
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
 
+    def to_reducer_dict(self):
+        data = self.to_dict()
+
+        data["username"] = self.user.username
+        data["image"] = to_frontend(self.user.image)
+
+        return data

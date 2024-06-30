@@ -7,6 +7,8 @@ export interface MembershipEntity extends TableMixin {
     is_active: boolean;
     is_admin: boolean;
     status: string;
+    username: string;
+    image: null | string;
     course_id: string;
     user_id: string;
 }
