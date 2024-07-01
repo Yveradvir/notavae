@@ -3,21 +3,24 @@ import { Rejector } from "@modules/reducers/rejector";
 import { createAsyncThunk, EntityId, PayloadAction } from "@reduxjs/toolkit";
 import { LoadingStatus } from "@modules/constants/reducers.conts";
 import { RejectedError } from "@modules/constants/rejector.const";
-import { ccAssociationsAdapter, ccAssociationsState } from "../const";
+import { AssociationsEntity, ccAssociationsAdapter, ccAssociationsState } from "../const";
 
-interface deleteCcAssociationI {
+interface addCcAssociationI {
     associator_id: EntityId;
-    associated_id: EntityId;
+    body: {
+        name: string;
+        password: string | null;
+    }
 }
 
-export const deleteCcAssociation = createAsyncThunk<EntityId, deleteCcAssociationI>(
-    "current_course_memberships/kick",
-    async ({associated_id, associator_id}, thunkAPI) => {
+export const addCcAssociation = createAsyncThunk<AssociationsEntity, addCcAssociationI>(
+    "current_course_associations/load",
+    async ({body, associator_id}, thunkAPI) => {
         try {
-            const response = await LaunchedAxios.delete(`/c/single/${associator_id}/asso/${associated_id}`);
+            const response = await LaunchedAxios.post(`/c/single/${associator_id}/asso`, body);
 
-            if (response.status === 200) {
-                return response.data.subdata;
+            if (response.status === 201) {
+                return response.data.subdata as AssociationsEntity;
             } else {
                 return thunkAPI.rejectWithValue(Rejector.standartReject());
             }
@@ -29,20 +32,20 @@ export const deleteCcAssociation = createAsyncThunk<EntityId, deleteCcAssociatio
     }
 );
 
-export const deleteCcAssociation__Pending = (state: ccAssociationsState) => {
+export const addCcAssociation__Pending = (state: ccAssociationsState) => {
     state.loading = LoadingStatus.Loading;
 };
 
-export const deleteCcAssociation__Fulfilled = (
+export const addCcAssociation__Fulfilled = (
     state: ccAssociationsState,
-    action: PayloadAction<EntityId>
+    action: PayloadAction<AssociationsEntity>
 ) => {
-    ccAssociationsAdapter.removeOne(state, action.payload);
+    ccAssociationsAdapter.addOne(state, action.payload);
     state.loading = LoadingStatus.Loaded;
     state.error = null;
 };
 
-export const deleteCcAssociation__Rejected = (
+export const addCcAssociation__Rejected = (
     state: ccAssociationsState,
     action: { payload: unknown }
 ) => {

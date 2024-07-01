@@ -10,7 +10,7 @@ from app.core.utils.model_check import model_check_by_uuid
 from app.core.utils.membership_actions import does_user_cross_memberships_limit
 
 from app.core.database.models.user import UserTable
-from app.core.database.models.courses import CourseTable, AssociatedTable
+from app.core.database.models.courses import CourseTable
 from app.core.database.models.memberships import MembershipTable
 
 from app.site.backend.src.utils.const import OneResultedResponse, PasswordedRequest, FilterQuerys
@@ -74,8 +74,8 @@ async def courses_find(
     page: int = Query(1), user_id: str | None = Query(None),
     db: AsyncSession = Depends(db.get_session)
 ):
-    print(filters.model_dump())
     offset = (page - 1) * settings.pagination_unit
+  
     if user_id:
         await model_check_by_uuid(user_id, db, UserTable)
     
@@ -84,5 +84,6 @@ async def courses_find(
             .offset(offset)
             .limit(settings.pagination_unit)
     )).scalars().all()]
+    totalPages = (len((await db.execute(select(CourseTable))).scalars().all()) + settings.pagination_unit - 1) // settings.pagination_unit
 
-    return JSONResponse(BaseResponse(subdata=courses).model_dump(), 200)
+    return JSONResponse(BaseResponse(subdata={"courses": courses, "totalPages": totalPages}).model_dump(), 200)

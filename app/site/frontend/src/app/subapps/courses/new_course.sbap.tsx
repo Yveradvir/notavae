@@ -10,8 +10,12 @@ import { LaunchedAxios } from "@modules/api";
 import { useNavigate } from "react-router-dom";
 import { SwitchChip } from "@modules/components/header/components";
 import { InfoOutlined } from "@mui/icons-material";
+import { useAppDispatch } from "@modules/reducers";
+import { ccMembershipsActions } from "@modules/reducers/slices/cc_memberships";
+import { ccAssociationsActions } from "@modules/reducers/slices/cc_associations";
 
 const NewCourseForm: React.FC = () => {
+    const dispatch = useAppDispatch();
     const navigate = useNavigate();
     const [globalError, setGlobalError] = useState<string | null>(null);
     const initialValues: CourseValues = {
@@ -32,7 +36,9 @@ const NewCourseForm: React.FC = () => {
             const response = await LaunchedAxios.post("/c/new", body)
 
             if (response.status === 201) {
-                navigate(`/c/${response.data.subdata}`)
+                await dispatch(ccMembershipsActions.reset())
+                await dispatch(ccAssociationsActions.reset())
+                navigate(`/c/${response.data.subdata}`, {replace: true})
             }
         } catch (error) {
             if (error instanceof AxiosError) {

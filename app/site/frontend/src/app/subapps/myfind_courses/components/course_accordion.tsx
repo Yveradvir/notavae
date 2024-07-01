@@ -30,8 +30,8 @@ const CourseAccordion: React.FC<{ course: CourseEntity }> = ({ course }) => {
                 <Button
                     variant="contained"
                     color="primary"
-                    onClick={() => {
-                        navigate(`/c/${course.id}`);
+                    onClick={async () => {
+                        navigate(`/c/${course.id}`, {replace: true});
                     }}
                 >
                     <DoorBack />

@@ -1,64 +1,50 @@
 import { Box, Button, Dialog, DialogContent, DialogTitle, TextField, Typography } from "@mui/material";
 import { Formik, Form, Field, FormikHelpers } from "formik";
-import { check_error } from "@modules/utils/check_funcs";
-import { AxiosError } from "axios";
 import { useState } from "react";
-import * as Yup from "yup"
-import { LaunchedAxios } from "@modules/api";
 import { CourseEntity } from "@modules/reducers/slices/courses/const";
-import { useNavigate } from "react-router-dom";
+import { addCcAssociation } from "@modules/reducers/slices/cc_associations/thunk/add_association.thunk";
+import { useAppDispatch } from "@modules/reducers";
+import * as Yup from "yup"
+import { RejectedError } from "@modules/constants/rejector.const";
 
-interface ConfirmPasswordsValues {
-    user_password: string;
-    course_password: string;
+interface AddAssoValues {
+    name: string;
+    password: string;
 }
 
-export const ConfirmPasswordsSchema = Yup.object().shape({
-    user_password: Yup.string()
+export const AddAssoSchema = Yup.object().shape({
+    name: Yup.string()
         .min(2, "Minimum 2 letters")
         .max(40, "Maximum 40 letters")
         .required("Field is required"),
-    course_password: Yup.string()
+    password: Yup.string()
         .min(2, "Minimum 2 letters")
         .max(40, "Maximum 40 letters")
         .optional(),
 })
 
-interface ConfirmPasswordsI {
+interface AddAssoI {
     open: boolean;
     onClose: () => void;
     course: CourseEntity;
 }
 
-const ConfirmPasswords: React.FC<ConfirmPasswordsI> = ({
+const AddAsso: React.FC<AddAssoI> = ({
     open,
     onClose,
     course
 }) => {
-    const navigate = useNavigate();
-    const initialValues: ConfirmPasswordsValues = { user_password: "", course_password: "" };
+    const dispatch = useAppDispatch();
+    const initialValues: AddAssoValues = { name: "", password: "" };
     const [globalError, setGlobalError] = useState<string | null>(null);
 
     const onFormSubmit = async (
-        values: ConfirmPasswordsValues,
-        actions: FormikHelpers<ConfirmPasswordsValues>
+        values: AddAssoValues,
+        actions: FormikHelpers<AddAssoValues>
     ) => {
-        try {
-            const url = `/c/single/${course.id}/`
-            const password_confrimation = await LaunchedAxios.post(url + 'predelete', values)
-
-            if (password_confrimation.status === 200) {
-                const response = await LaunchedAxios.delete(url)
-
-                if (response.status === 200) {
-                    navigate('/c/my')
-                }
-            }
-        } catch (error) {
-            if (error instanceof AxiosError) {
-                setGlobalError(check_error(error));
-            }
-        }
+        const thunk = await dispatch(addCcAssociation({associator_id: course.id, body: values}))
+        
+        if (thunk.meta.requestStatus === "rejected") setGlobalError((thunk.payload as RejectedError).detail)
 
         actions.setSubmitting(false);
     };
@@ -72,40 +58,39 @@ const ConfirmPasswords: React.FC<ConfirmPasswordsI> = ({
                 <Formik
                     initialValues={initialValues}
                     onSubmit={onFormSubmit}
-                    validationSchema={ConfirmPasswordsSchema}
+                    validationSchema={AddAssoSchema}
                 >
                     {({ errors, touched }) => (
                         <Form>
                             <Box mb={2}>
                                 <Field
                                     as={TextField}
-                                    name="user_password"
-                                    label="Your password"
-                                    type="password"
+                                    name="name"
+                                    label="Name of associated group"
                                     variant="outlined"
                                     fullWidth
                                     error={
-                                        touched.user_password && !!errors.user_password
+                                        touched.name && !!errors.name
                                     }
                                     helperText={
-                                        touched.user_password && errors.user_password
+                                        touched.name && errors.name
                                     }
                                 />
                             </Box>
-                            {course.is_private && (<Box mb={2}>
-                                <Field
+                            <Box mb={2}>
+                                {course.is_private && (<Field
                                     as={TextField}
-                                    name="course_password"
+                                    name="password"
                                     label="Course Password"
                                     type="password"
                                     variant="outlined"
                                     fullWidth
-                                    error={touched.course_password && !!errors.course_password}
+                                    error={touched.password && !!errors.password}
                                     helperText={
-                                        touched.course_password && errors.course_password
+                                        touched.password && errors.password
                                     }
-                                />
-                            </Box>)}
+                                />)}
+                            </Box>
                             <Box mt={2}>
                                 <Button
                                     type="submit"
@@ -113,7 +98,7 @@ const ConfirmPasswords: React.FC<ConfirmPasswordsI> = ({
                                     color="primary"
                                     fullWidth
                                 >
-                                    Delete
+                                    Add association
                                 </Button>
                             </Box>
                             {globalError && (
@@ -129,4 +114,4 @@ const ConfirmPasswords: React.FC<ConfirmPasswordsI> = ({
     );
 };
 
-export default ConfirmPasswords;
+export default AddAsso;

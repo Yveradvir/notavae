@@ -8,9 +8,21 @@ class CoursesCourseNewModel(BaseModel):
 
     image: str | None
 
+
 class CoursesPreDeleteModel(BaseModel):
     user_password: str
-    course_password: str
+    course_password: str | None
 
+
+class CoursesAssociationNewModel(BaseModel):
+    name: str
+    password: str | None
+
+
+class CoursesSingleTopicChange(BaseModel):
+    current_topic: str
+    course_password: str | None
+
+    
 class CoursesMembershipStatusChange(BaseModel):
     status: str

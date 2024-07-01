@@ -16,24 +16,41 @@ import {
 import { kickCcMember } from "@modules/reducers/slices/cc_memberships/thunks/kick_cc_member.thunk";
 import { loadCcMemberships } from "@modules/reducers/slices/cc_memberships/thunks/load_cc_memberships.thunk";
 import AdminModal from "./modals/admin";
-import { AdminPanelSettingsOutlined, ExitToAppOutlined, PersonAddAltOutlined } from "@mui/icons-material";
+import {
+    AdminPanelSettingsOutlined,
+    DoorBack,
+    ExitToAppOutlined,
+    PersonAddAltOutlined,
+} from "@mui/icons-material";
 import { MembershipEntity } from "@modules/reducers/slices/cc_memberships/const";
 import StatusModal from "./modals/status.modal";
 import { changeActivityCc } from "@modules/reducers/slices/cc_memberships/thunks/change_activity.thunk";
+import { deleteCcAssociation } from "@modules/reducers/slices/cc_associations/thunk/delete_cc_association.thunk";
+import { loadCcAssociations } from "@modules/reducers/slices/cc_associations/thunk/load_associations.thunk";
+import { useNavigate } from "react-router-dom";
+import { ccAssociationsActions } from "@modules/reducers/slices/cc_associations";
+import { ccMembershipsActions } from "@modules/reducers/slices/cc_memberships";
 
 interface CourseRenderProps {
     course: CourseEntity;
 }
 
 const CourseRender: React.FC<CourseRenderProps> = ({ course }) => {
+    const navigate = useNavigate();
     const dispatch = useAppDispatch();
-    const ccMemberships = useAppSelector((state) => state.current_course_memberships);
+    const ccMemberships = useAppSelector(
+        (state) => state.current_course_memberships
+    );
+    const ccAssociations = useAppSelector(
+        (state) => state.current_course_associations
+    );
     const profile = useAppSelector((state) => state.profile);
     const [adminModalOpen, setAdminModalOpen] = useState<boolean>(false);
     const [speedDialOpen, setSpeedDialOpen] = useState<boolean>(false);
 
     useEffect(() => {
         dispatch(loadCcMemberships(course.id));
+        dispatch(loadCcAssociations(course.id));
     }, [dispatch, course.id]);
 
     const handleLeaveCourse = async () => {
@@ -45,7 +62,9 @@ const CourseRender: React.FC<CourseRenderProps> = ({ course }) => {
     };
 
     const handleKickMember = async (user_id: string) => {
-        await dispatch(kickCcMember({ course_id: course.id, kicked_id: user_id }));
+        await dispatch(
+            kickCcMember({ course_id: course.id, kicked_id: user_id })
+        );
     };
 
     const isAdmin = profile.instances.profileEntity?.id === course.author_id;
@@ -53,7 +72,9 @@ const CourseRender: React.FC<CourseRenderProps> = ({ course }) => {
         profile.instances.profileEntity?.id === membership.user_id;
 
     const isUserIn = () => {
-        const user_ids = ccMemberships.ids.map((id) => ccMemberships.entities[id]?.user_id);
+        const user_ids = ccMemberships.ids.map(
+            (id) => ccMemberships.entities[id]?.user_id
+        );
         return user_ids.includes(profile.instances.profileEntity?.id as string);
     };
 
@@ -75,14 +96,30 @@ const CourseRender: React.FC<CourseRenderProps> = ({ course }) => {
             <Paper sx={{ marginBottom: 2, padding: 2 }}>
                 <Typography variant="h5">{course.name}</Typography>
                 <Typography>{course.description}</Typography>
+                {course.current_topic && (<Paper
+                    sx={{
+                        marginTop: 1,
+                        padding: 1,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                    }}
+
+                >
+                    <Typography>
+                        {course.current_topic}
+                    </Typography>
+                </Paper>)}
             </Paper>
             <Paper sx={{ marginBottom: 2, padding: 2 }}>
                 <Typography variant="h6">Memberships</Typography>
                 {ccMemberships.ids.map((m_id) => {
-                    const membership = ccMemberships.entities[m_id] as MembershipEntity;
+                    const membership = ccMemberships.entities[
+                        m_id
+                    ] as MembershipEntity;
                     return (
                         <Paper
-                            key={membership.user_id}
+                            key={membership.id}
                             sx={{
                                 marginTop: 1,
                                 padding: 1,
@@ -96,11 +133,16 @@ const CourseRender: React.FC<CourseRenderProps> = ({ course }) => {
                                     {membershipStatusIcon(membership.is_active)}
                                 </Grid>
                                 <Grid item>
-                                    <Avatar 
+                                    <Avatar
                                         alt={membership.user_id}
-                                        src={`data:image/jpeg;base64,${membership.image}` || "https://static-00.iconduck.com/assets.00/user-avatar-1-icon-511x512-ynet6qk9.png"}
+                                        src={
+                                            `data:image/jpeg;base64,${membership.image}` ||
+                                            "https://static-00.iconduck.com/assets.00/user-avatar-1-icon-511x512-ynet6qk9.png"
+                                        }
                                     />
-                                    <Typography variant="body1">{membership.username}</Typography>
+                                    <Typography variant="body1">
+                                        {membership.username}
+                                    </Typography>
                                 </Grid>
                                 <Grid item xs>
                                     <StatusModal
@@ -115,7 +157,11 @@ const CourseRender: React.FC<CourseRenderProps> = ({ course }) => {
                                             variant="contained"
                                             color="secondary"
                                             onClick={async () => {
-                                                await dispatch(changeActivityCc(membership.course_id))
+                                                await dispatch(
+                                                    changeActivityCc(
+                                                        membership.course_id
+                                                    )
+                                                );
                                             }}
                                         >
                                             Switch activity
@@ -127,7 +173,11 @@ const CourseRender: React.FC<CourseRenderProps> = ({ course }) => {
                                         <Button
                                             variant="contained"
                                             color="secondary"
-                                            onClick={() => handleKickMember(membership.user_id)}
+                                            onClick={() =>
+                                                handleKickMember(
+                                                    membership.user_id
+                                                )
+                                            }
                                             startIcon={<ExitToAppOutlined />}
                                         >
                                             Kick
@@ -141,6 +191,72 @@ const CourseRender: React.FC<CourseRenderProps> = ({ course }) => {
             </Paper>
             <Paper sx={{ marginBottom: 2, padding: 2 }}>
                 <Typography variant="h6">Associations</Typography>
+                {ccAssociations.ids.map((id) => {
+                    const association = ccAssociations.entities[id];
+                    return (
+                        <Paper
+                            key={association.id}
+                            sx={{
+                                marginTop: 1,
+                                padding: 1,
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "space-between",
+                            }}
+                        >
+                            <Grid container spacing={2} alignItems="center">
+                                <Grid item>
+                                    <Typography variant="body1">
+                                        {association.associated_name}
+                                    </Typography>
+                                </Grid>
+                                <Grid item>
+                                    <Button
+                                        variant="outlined"
+                                        color="primary"
+                                        startIcon={<DoorBack />}
+                                        onClick={async () => {
+                                            await dispatch(
+                                                ccAssociationsActions.reset()
+                                            );
+                                            await dispatch(
+                                                ccMembershipsActions.reset()
+                                            );
+
+                                            navigate(
+                                                `/c/${association.associated_id}`,
+                                                { replace: true }
+                                            );
+                                        }}
+                                    >
+                                        Go
+                                    </Button>
+                                </Grid>
+                                {isAdmin && (
+                                    <Grid item>
+                                        <Button
+                                            variant="contained"
+                                            color="secondary"
+                                            onClick={async () => {
+                                                await dispatch(
+                                                    deleteCcAssociation({
+                                                        associated_id:
+                                                            association.associated_id,
+                                                        associator_id:
+                                                            association.associator_id,
+                                                    })
+                                                );
+                                            }}
+                                            startIcon={<ExitToAppOutlined />}
+                                        >
+                                            Delete
+                                        </Button>
+                                    </Grid>
+                                )}
+                            </Grid>
+                        </Paper>
+                    );
+                })}
             </Paper>
             <SpeedDial
                 ariaLabel="SpeedDial"
@@ -151,15 +267,23 @@ const CourseRender: React.FC<CourseRenderProps> = ({ course }) => {
                 sx={{ position: "fixed", bottom: 16, right: 16 }}
             >
                 <SpeedDialAction
-                    icon={isUserIn() ? <ExitToAppOutlined /> : <PersonAddAltOutlined />}
+                    icon={
+                        isUserIn() ? (
+                            <ExitToAppOutlined />
+                        ) : (
+                            <PersonAddAltOutlined />
+                        )
+                    }
                     tooltipTitle={isUserIn() ? "Leave" : "Join"}
                     onClick={isUserIn() ? handleLeaveCourse : handleJoinCourse}
                 />
                 {isAdmin && (
-                    <SpeedDialAction 
-                        icon={<AdminPanelSettingsOutlined/>}
+                    <SpeedDialAction
+                        icon={<AdminPanelSettingsOutlined />}
                         tooltipTitle={"Admin panel"}
-                        onClick={() => {setAdminModalOpen(true)}}
+                        onClick={() => {
+                            setAdminModalOpen(true);
+                        }}
                     />
                 )}
             </SpeedDial>

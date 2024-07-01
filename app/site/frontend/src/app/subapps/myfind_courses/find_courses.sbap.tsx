@@ -4,14 +4,9 @@ import { RejectedError } from "@modules/constants/rejector.const";
 import { useAppDispatch, useAppSelector } from "@modules/reducers";
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-    CircularProgress,
-    Typography,
-    Box,
-} from "@mui/material";
+import { CircularProgress, Typography, Box, Pagination } from "@mui/material";
 import { EntityId } from "@reduxjs/toolkit";
 import { loadFindCourses } from "@modules/reducers/slices/courses/find_courses/thunks/load_find_courses.thunk";
-import InfiniteScroll from "react-infinite-scroll-component";
 import FilterButton from "@modules/components/filter";
 import { findCoursesActions } from "@modules/reducers/slices/courses/find_courses";
 import CourseAccordion from "./components/course_accordion";
@@ -21,7 +16,7 @@ const FindCoursesPage = () => {
     const dispatch = useAppDispatch();
     const [page, setPage] = useState<number>(1);
 
-    const { entities, loading, ids, hasMore } = useAppSelector(
+    const { entities, loading, ids, totalPages } = useAppSelector(
         (state) => state.find_courses
     );
 
@@ -40,13 +35,12 @@ const FindCoursesPage = () => {
         fetchCourses();
     }, [dispatch, navigate, page]);
 
-    const loadMore = useCallback(async () => {
-        setPage((prevPage) => prevPage + 1);
-        await dispatch(loadFindCourses(page));
-    }, [setPage, page, dispatch]);
+    const handlePageChange = (_event: React.ChangeEvent<unknown>, value: number) => {
+        setPage(value);
+    };
 
     const renderContent = () => {
-        if (loading === LoadingStatus.Loading && page === 1) {
+        if (loading === LoadingStatus.Loading) {
             return (
                 <Box display="flex" justifyContent="center" mt={2}>
                     <CircularProgress />
@@ -65,34 +59,18 @@ const FindCoursesPage = () => {
         }
 
         return (
-            <InfiniteScroll
-                dataLength={ids.length}
-                next={loadMore}
-                hasMore={hasMore}
-                loader={
-                    <Box display="flex" justifyContent="center" mt={2}>
-                        <CircularProgress />
-                    </Box>
-                }
-                endMessage={
-                    <Box display="flex" justifyContent="center" mt={2}>
-                        <Typography variant="h6">
-                            You have seen it all!
-                        </Typography>
-                    </Box>
-                }
-            >
+            <Box>
                 {ids.map((id: EntityId) => (
-                    <CourseAccordion course={entities[id]}/>
+                    <CourseAccordion key={id} course={entities[id]} />
                 ))}
-            </InfiniteScroll>
+            </Box>
         );
     };
 
     const onSubmit = useCallback(async () => {
         setPage(1);
-        await dispatch(loadFindCourses(page));
-    }, [setPage, page, dispatch]);
+        await dispatch(loadFindCourses(1));
+    }, [dispatch]);
 
     return (
         <Layout>
@@ -100,6 +78,16 @@ const FindCoursesPage = () => {
                 <FilterButton onSubmit={onSubmit} actions={findCoursesActions} />
             </Box>
             {renderContent()}
+            {loading !== LoadingStatus.Loading && (
+                <Box display="flex" justifyContent="center" mt={2}>
+                    <Pagination
+                        count={totalPages}
+                        page={page}
+                        onChange={handlePageChange}
+                        color="primary"
+                    />
+                </Box>
+            )}
         </Layout>
     );
 };

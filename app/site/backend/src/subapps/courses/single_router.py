@@ -12,7 +12,7 @@ from app.core.database.models.user import UserTable
 from app.core.utils.model_check import model_check_by_uuid
 
 from app.site.backend.src.utils.const import BaseResponse, NoneResultedResponse
-from app.site.backend.src.subapps.courses.models import CoursesPreDeleteModel
+from app.site.backend.src.subapps.courses.models import CoursesPreDeleteModel, CoursesSingleTopicChange
 
 from app.site.backend.src.subapps.courses.memberships_router import membership_router
 from app.site.backend.src.subapps.courses.association_router import association_router
@@ -55,7 +55,37 @@ async def delete__single_course(
     request: Request, instance_id: Annotated[str, Path(...)],
     db: AsyncSession = Depends(db.get_session)
 ):
-    return None
+    instance: CourseTable = await model_check_by_uuid(instance_id, db, CourseTable)
+    me: UserTable = await model_check_by_uuid(request.state.token['data']['id'], db, UserTable)
+
+    if instance.author_id != me.id:
+        raise HTTPException(403, "You aren't an author of this course")
+
+    await db.delete(instance)
+    await db.commit()
+
+    return JSONResponse(NoneResultedResponse().model_dump(), 200)
+
+@single_router.patch(path="/topic", dependencies=[Depends(jwtsecure.depend_access_token)])
+async def single_course_topic(
+    request: Request, body: CoursesSingleTopicChange,
+    instance_id: Annotated[str, Path(...)],
+    db: AsyncSession = Depends(db.get_session)
+):
+    instance: CourseTable = await model_check_by_uuid(instance_id, db, CourseTable)
+    me: UserTable = await model_check_by_uuid(request.state.token['data']['id'], db, UserTable)
+
+    if instance.author_id != me.id:
+        raise HTTPException(403, "You aren't an author of this course")
+
+    if instance.password:
+        if not cryptcontext.verify(body.course_password, instance.password):
+            raise HTTPException(403, "Provided course doesn't match with real password")
+
+    instance.current_topic = body.current_topic
+    await db.commit()
+
+    return JSONResponse(NoneResultedResponse().model_dump(), 200)
 
 single_router.include_router(membership_router)
 single_router.include_router(association_router)

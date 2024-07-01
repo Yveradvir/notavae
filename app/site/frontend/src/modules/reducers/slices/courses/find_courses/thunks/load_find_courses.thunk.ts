@@ -6,7 +6,12 @@ import { RejectedError } from "@modules/constants/rejector.const";
 import { CourseEntity, FiltersEntity } from "../../const";
 import { findCoursesAdapter, FindCoursesState } from "../const";
 
-export const loadFindCourses = createAsyncThunk<CourseEntity[], number>(
+interface loadFindCoursesI {
+    courses: CourseEntity[]; 
+    totalPages: number;
+}
+
+export const loadFindCourses = createAsyncThunk<loadFindCoursesI, number>(
     "find_courses/load",
     async (page, thunkAPI) => {
         try {
@@ -44,14 +49,13 @@ export const loadFindCourses__Pending = (state: FindCoursesState) => {
 
 export const loadFindCourses__Fulfilled = (
     state: FindCoursesState,
-    action: PayloadAction<CourseEntity[]>
+    action: PayloadAction<loadFindCoursesI>
 ) => {
-    state.hasMore = true;
-
-    if (action.payload.length) {
-        findCoursesAdapter.addMany(state, action.payload);
-    } else state.hasMore = false;
-
+    console.log(action.payload);
+    
+    findCoursesAdapter.setAll(state, action.payload.courses);
+    
+    state.totalPages = action.payload.totalPages
     state.loading = LoadingStatus.Loaded;
     state.error = null;
 };
