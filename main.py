@@ -15,8 +15,6 @@ def run_projects(projects: list) -> None:
     os.environ['PYTHONPATH'] = python_path
 
     project_mapping = {
-        'd': ["start", "cmd", "/k", "py", "app/discord/run.py"],
-        't': ["start", "cmd", "/k", "py", "app/telegram/run.py"],
         'f': ["start", "cmd", "/k", "cd app/site/frontend && npm run dev"],
         'b': ["start", "cmd", "/k", "uvicorn app.site.backend.run:app --host localhost --port 4300 --reload"]
     }
@@ -25,9 +23,6 @@ def run_projects(projects: list) -> None:
         if 'site' in projects:
             projects.pop(projects.index('site'))
             projects += ['b', 'f']
-        if 'bot' in projects:
-            projects.pop(projects.index('bot'))
-            projects += ['d', 't']
     else:
         projects = project_mapping.keys()
 

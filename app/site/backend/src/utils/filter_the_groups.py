@@ -10,7 +10,7 @@ async def filter_the_groups(
     user_id: str | None = None
 ):
     query = select(CourseTable)
-    print(filters.model_dump())
+
     if filters.name: query = query.where(CourseTable.name.ilike(filters.name))
 
     if filters.newest: query = query.order_by(CourseTable.created_at.desc())
